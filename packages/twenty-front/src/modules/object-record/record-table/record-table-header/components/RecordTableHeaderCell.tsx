@@ -5,7 +5,6 @@ import { IconPlus } from 'twenty-ui';
 
 import { FieldMetadata } from '@/object-record/record-field/types/FieldMetadata';
 import { useRecordTableStates } from '@/object-record/record-table/hooks/internal/useRecordTableStates';
-import { useCreateNewTableRecord } from '@/object-record/record-table/hooks/useCreateNewTableRecords';
 import { useTableColumns } from '@/object-record/record-table/hooks/useTableColumns';
 import { RecordTableColumnHeadWithDropdown } from '@/object-record/record-table/record-table-header/components/RecordTableColumnHeadWithDropdown';
 import { isRecordTableScrolledLeftComponentState } from '@/object-record/record-table/states/isRecordTableScrolledLeftComponentState';
@@ -91,8 +90,10 @@ const StyledHeaderIcon = styled.div`
 
 export const RecordTableHeaderCell = ({
   column,
+  createRecord,
 }: {
   column: ColumnDefinition<FieldMetadata>;
+  createRecord: () => void;
 }) => {
   const { resizeFieldOffsetState, tableColumnsState } = useRecordTableStates();
 
@@ -184,12 +185,6 @@ export const RecordTableHeaderCell = ({
   const disableColumnResize =
     column.isLabelIdentifier && isMobile && !isRecordTableScrolledLeft;
 
-  const { createNewTableRecord } = useCreateNewTableRecord();
-
-  const handlePlusButtonClick = () => {
-    createNewTableRecord();
-  };
-
   return (
     <StyledColumnHeaderCell
       key={column.fieldMetadataId}
@@ -211,7 +206,7 @@ export const RecordTableHeaderCell = ({
               Icon={IconPlus}
               size="small"
               accent="tertiary"
-              onClick={handlePlusButtonClick}
+              onClick={createRecord}
             />
           </StyledHeaderIcon>
         )}

@@ -1,4 +1,5 @@
 import { ObjectMetadataItem } from '@/object-metadata/types/ObjectMetadataItem';
+import { parseFieldRelationType } from '@/object-metadata/utils/parseFieldRelationType';
 import { FieldDefinition } from '@/object-record/record-field/types/FieldDefinition';
 import { FieldMetadata } from '@/object-record/record-field/types/FieldMetadata';
 import { getFieldButtonIcon } from '@/object-record/record-field/utils/getFieldButtonIcon';
@@ -19,15 +20,17 @@ export const formatFieldMetadataItemAsFieldDefinition = ({
   labelWidth,
 }: FieldMetadataItemAsFieldDefinitionProps): FieldDefinition<FieldMetadata> => {
   const relationObjectMetadataItem =
-    field.relationDefinition?.targetObjectMetadata;
+    field.toRelationMetadata?.fromObjectMetadata ||
+    field.fromRelationMetadata?.toObjectMetadata;
 
   const relationFieldMetadataId =
-    field.relationDefinition?.targetFieldMetadata.id;
+    field.toRelationMetadata?.fromFieldMetadataId ||
+    field.fromRelationMetadata?.toFieldMetadataId;
 
   const fieldDefintionMetadata = {
     fieldName: field.name,
     placeHolder: field.label,
-    relationType: field.relationDefinition?.direction,
+    relationType: parseFieldRelationType(field),
     relationFieldMetadataId,
     relationObjectMetadataNameSingular:
       relationObjectMetadataItem?.nameSingular ?? '',

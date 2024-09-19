@@ -1,9 +1,8 @@
 import { ConnectedAccount } from '@/accounts/types/ConnectedAccount';
 import { SettingsAccountsRowDropdownMenu } from '@/settings/accounts/components/SettingsAccountsRowDropdownMenu';
-import { SyncStatus } from '@/settings/accounts/constants/SyncStatus';
-import { computeSyncStatus } from '@/settings/accounts/utils/computeSyncStatus';
 import { Status } from '@/ui/display/status/components/Status';
 import styled from '@emotion/styled';
+import { useMemo } from 'react';
 
 const StyledRowRightContainer = styled.div`
   align-items: center;
@@ -16,26 +15,39 @@ export const SettingsAccountsConnectedAccountsRowRightContainer = ({
 }: {
   account: ConnectedAccount;
 }) => {
-  const messageChannelSyncStatus = account.messageChannels[0]?.syncStatus;
-  const calendarChannelSyncStatus = account.calendarChannels[0]?.syncStatus;
+  const mCSyncStatus = account.messageChannels[0]?.syncStatus;
+  const cCSyncStatus = account.calendarChannels[0]?.syncStatus;
 
-  const status = computeSyncStatus(
-    messageChannelSyncStatus,
-    calendarChannelSyncStatus,
-  );
+  const status = useMemo(() => {
+    if (mCSyncStatus === 'ACTIVE' && cCSyncStatus === 'ACTIVE') {
+      return 'Synced';
+    } else if (mCSyncStatus === 'NOT_SYNCED' && cCSyncStatus === 'NOT_SYNCED') {
+      return 'Not synced';
+    } else if (mCSyncStatus === 'ONGOING' || cCSyncStatus === 'ONGOING') {
+      return 'Importing';
+    } else if (
+      mCSyncStatus === 'FAILED' ||
+      mCSyncStatus === 'FAILED_INSUFFICIENT_PERMISSIONS' ||
+      cCSyncStatus === 'FAILED' ||
+      cCSyncStatus === 'FAILED_INSUFFICIENT_PERMISSIONS'
+    ) {
+      return 'Failed';
+    }
+    return '';
+  }, [mCSyncStatus, cCSyncStatus]);
 
   return (
     <StyledRowRightContainer>
-      {status === SyncStatus.FAILED && (
+      {status === 'Failed' && (
         <Status color="red" text="Sync failed" weight="medium" />
       )}
-      {status === SyncStatus.SYNCED && (
+      {status === 'Synced' && (
         <Status color="green" text="Synced" weight="medium" />
       )}
-      {status === SyncStatus.NOT_SYNCED && (
+      {status === 'Not synced' && (
         <Status color="orange" text="Not synced" weight="medium" />
       )}
-      {status === SyncStatus.IMPORTING && (
+      {status === 'Importing' && (
         <Status
           color="turquoise"
           text="Importing"

@@ -9,7 +9,6 @@ import { UserWorkspaceService } from 'src/engine/core-modules/user-workspace/use
 import { User } from 'src/engine/core-modules/user/user.entity';
 import { Workspace } from 'src/engine/core-modules/workspace/workspace.entity';
 import { EnvironmentService } from 'src/engine/core-modules/environment/environment.service';
-import { AppToken } from 'src/engine/core-modules/app-token/app-token.entity';
 
 describe('SignInUpService', () => {
   let service: SignInUpService;
@@ -28,10 +27,6 @@ describe('SignInUpService', () => {
         },
         {
           provide: getRepositoryToken(User, 'core'),
-          useValue: {},
-        },
-        {
-          provide: getRepositoryToken(AppToken, 'core'),
           useValue: {},
         },
         {

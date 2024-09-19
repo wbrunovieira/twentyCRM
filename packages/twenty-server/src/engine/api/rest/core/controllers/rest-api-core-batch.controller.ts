@@ -4,11 +4,10 @@ import { Request, Response } from 'express';
 
 import { RestApiCoreService } from 'src/engine/api/rest/core/rest-api-core.service';
 import { cleanGraphQLResponse } from 'src/engine/api/rest/utils/clean-graphql-response.utils';
-import { JwtAuthGuard } from 'src/engine/guards/jwt-auth.guard';
-import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
+import { JwtAuthGuard } from 'src/engine/guards/jwt.auth.guard';
 
 @Controller('rest/batch/*')
-@UseGuards(JwtAuthGuard, WorkspaceAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class RestApiCoreBatchController {
   constructor(private readonly restApiCoreService: RestApiCoreService) {}
 

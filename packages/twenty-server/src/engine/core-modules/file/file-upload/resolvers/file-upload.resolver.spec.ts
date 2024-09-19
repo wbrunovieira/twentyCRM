@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { EnvironmentService } from 'src/engine/core-modules/environment/environment.service';
 import { FileUploadService } from 'src/engine/core-modules/file/file-upload/services/file-upload.service';
 
 import { FileUploadResolver } from './file-upload.resolver';
@@ -14,10 +13,6 @@ describe('FileUploadResolver', () => {
         FileUploadResolver,
         {
           provide: FileUploadService,
-          useValue: {},
-        },
-        {
-          provide: EnvironmentService,
           useValue: {},
         },
       ],

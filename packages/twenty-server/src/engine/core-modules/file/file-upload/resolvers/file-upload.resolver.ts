@@ -9,10 +9,10 @@ import { FileUploadService } from 'src/engine/core-modules/file/file-upload/serv
 import { Workspace } from 'src/engine/core-modules/workspace/workspace.entity';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
 import { DemoEnvGuard } from 'src/engine/guards/demo.env.guard';
-import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
+import { JwtAuthGuard } from 'src/engine/guards/jwt.auth.guard';
 import { streamToBuffer } from 'src/utils/stream-to-buffer';
 
-@UseGuards(WorkspaceAuthGuard, DemoEnvGuard)
+@UseGuards(JwtAuthGuard, DemoEnvGuard)
 @Resolver()
 export class FileUploadResolver {
   constructor(private readonly fileUploadService: FileUploadService) {}

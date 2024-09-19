@@ -11,12 +11,18 @@ const EMPTY_DIAGRAM: WorkflowDiagram = {
 export const getWorkflowVersionDiagram = (
   workflowVersion: WorkflowVersion | undefined,
 ): WorkflowDiagram => {
-  if (!isDefined(workflowVersion)) {
+  if (
+    !(
+      isDefined(workflowVersion) &&
+      isDefined(workflowVersion.trigger) &&
+      isDefined(workflowVersion.steps)
+    )
+  ) {
     return EMPTY_DIAGRAM;
   }
 
   return generateWorkflowDiagram({
-    trigger: workflowVersion.trigger ?? undefined,
-    steps: workflowVersion.steps ?? [],
+    trigger: workflowVersion.trigger,
+    steps: workflowVersion.steps,
   });
 };

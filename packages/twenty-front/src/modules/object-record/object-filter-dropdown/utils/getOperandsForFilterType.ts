@@ -22,7 +22,6 @@ export const getOperandsForFilterType = (
     case 'LINK':
     case 'LINKS':
     case 'ACTOR':
-    case 'ARRAY':
     case 'PHONES':
       return [
         ViewFilterOperand.Contains,

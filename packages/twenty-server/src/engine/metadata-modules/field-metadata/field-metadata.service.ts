@@ -4,7 +4,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmQueryService } from '@ptc-org/nestjs-query-typeorm';
 import isEmpty from 'lodash.isempty';
 import { DataSource, FindOneOptions, Repository } from 'typeorm';
-import { v4 as uuidV4, v4 } from 'uuid';
+import { v4 as uuidV4 } from 'uuid';
 
 import { TypeORMService } from 'src/database/typeorm/typeorm.service';
 import { DataSourceService } from 'src/engine/metadata-modules/data-source/data-source.service';
@@ -41,7 +41,7 @@ import { NameTooLongException } from 'src/engine/metadata-modules/utils/exceptio
 import { exceedsDatabaseIdentifierMaximumLength } from 'src/engine/metadata-modules/utils/validate-database-identifier-length.utils';
 import { validateFieldNameAvailabilityOrThrow } from 'src/engine/metadata-modules/utils/validate-field-name-availability.utils';
 import { validateMetadataNameValidityOrThrow as validateFieldNameValidityOrThrow } from 'src/engine/metadata-modules/utils/validate-metadata-name-validity.utils';
-import { WorkspaceMetadataVersionService } from 'src/engine/metadata-modules/workspace-metadata-version/services/workspace-metadata-version.service';
+import { WorkspaceMetadataVersionService } from 'src/engine/metadata-modules/workspace-metadata-version/workspace-metadata-version.service';
 import { generateMigrationName } from 'src/engine/metadata-modules/workspace-migration/utils/generate-migration-name.util';
 import {
   WorkspaceMigrationColumnActionType,
@@ -72,8 +72,6 @@ export class FieldMetadataService extends TypeOrmQueryService<FieldMetadataEntit
     private readonly metadataDataSource: DataSource,
     @InjectRepository(FieldMetadataEntity, 'metadata')
     private readonly fieldMetadataRepository: Repository<FieldMetadataEntity>,
-    @InjectRepository(ObjectMetadataEntity, 'metadata')
-    private readonly objectMetadataRepository: Repository<ObjectMetadataEntity>,
     private readonly objectMetadataService: ObjectMetadataService,
     private readonly workspaceMigrationFactory: WorkspaceMigrationFactory,
     private readonly workspaceMigrationService: WorkspaceMigrationService,
@@ -89,7 +87,6 @@ export class FieldMetadataService extends TypeOrmQueryService<FieldMetadataEntit
   override async createOne(
     fieldMetadataInput: CreateFieldInput,
   ): Promise<FieldMetadataEntity> {
-    console.time('createOne');
     const queryRunner = this.metadataDataSource.createQueryRunner();
 
     await queryRunner.connect();
@@ -100,23 +97,20 @@ export class FieldMetadataService extends TypeOrmQueryService<FieldMetadataEntit
         queryRunner.manager.getRepository<FieldMetadataEntity>(
           FieldMetadataEntity,
         );
-
-      console.time('createOne query');
-      const [objectMetadata] = await this.objectMetadataRepository.find({
-        where: {
-          id: fieldMetadataInput.objectMetadataId,
-          workspaceId: fieldMetadataInput.workspaceId,
-        },
-        relations: ['fields'],
-        order: {},
-      });
-
-      console.timeEnd('createOne query');
+      const objectMetadata =
+        await this.objectMetadataService.findOneWithinWorkspace(
+          fieldMetadataInput.workspaceId,
+          {
+            where: {
+              id: fieldMetadataInput.objectMetadataId,
+            },
+          },
+        );
 
       if (!objectMetadata) {
         throw new FieldMetadataException(
           'Object metadata does not exist',
-          FieldMetadataExceptionCode.OBJECT_METADATA_NOT_FOUND,
+          FieldMetadataExceptionCode.INVALID_FIELD_INPUT,
         );
       }
 
@@ -161,11 +155,22 @@ export class FieldMetadataService extends TypeOrmQueryService<FieldMetadataEntit
         objectMetadata,
       );
 
-      console.time('createOne save');
+      const fieldAlreadyExists = await fieldMetadataRepository.findOne({
+        where: {
+          name: fieldMetadataInput.name,
+          objectMetadataId: fieldMetadataInput.objectMetadataId,
+          workspaceId: fieldMetadataInput.workspaceId,
+        },
+      });
+
+      if (fieldAlreadyExists) {
+        throw new FieldMetadataException(
+          'Field already exists',
+          FieldMetadataExceptionCode.FIELD_ALREADY_EXISTS,
+        );
+      }
+
       const createdFieldMetadata = await fieldMetadataRepository.save({
-        id: v4(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
         ...fieldMetadataInput,
         isNullable: generateNullable(
           fieldMetadataInput.type,
@@ -185,10 +190,7 @@ export class FieldMetadataService extends TypeOrmQueryService<FieldMetadataEntit
         isCustom: true,
       });
 
-      console.timeEnd('createOne save');
-
       if (!fieldMetadataInput.isRemoteCreation) {
-        console.time('createOne migration create');
         await this.workspaceMigrationService.createCustomMigration(
           generateMigrationName(`create-${createdFieldMetadata.name}`),
           fieldMetadataInput.workspaceId,
@@ -204,16 +206,11 @@ export class FieldMetadataService extends TypeOrmQueryService<FieldMetadataEntit
           ],
         );
 
-        console.timeEnd('createOne migration create');
-
-        console.time('createOne migration run');
         await this.workspaceMigrationRunnerService.executeMigrationFromPendingMigrations(
           fieldMetadataInput.workspaceId,
         );
-        console.timeEnd('createOne migration run');
       }
 
-      console.time('createOne workspace viewField');
       // TODO: Move viewField creation to a cdc scheduler
       const dataSourceMetadata =
         await this.dataSourceService.getLastDataSourceMetadataFromWorkspaceIdOrFail(
@@ -273,11 +270,8 @@ export class FieldMetadataService extends TypeOrmQueryService<FieldMetadataEntit
             );
           }
         }
-        console.timeEnd('createOne workspace viewField');
 
-        console.time('createOne internal commit');
         await workspaceQueryRunner.commitTransaction();
-        console.timeEnd('createOne internal commit');
       } catch (error) {
         await workspaceQueryRunner.rollbackTransaction();
         throw error;
@@ -285,9 +279,7 @@ export class FieldMetadataService extends TypeOrmQueryService<FieldMetadataEntit
         await workspaceQueryRunner.release();
       }
 
-      console.time('createOne commit');
       await queryRunner.commitTransaction();
-      console.timeEnd('createOne commit');
 
       return createdFieldMetadata;
     } catch (error) {
@@ -295,12 +287,9 @@ export class FieldMetadataService extends TypeOrmQueryService<FieldMetadataEntit
       throw error;
     } finally {
       await queryRunner.release();
-      console.time('createOne increment');
       await this.workspaceMetadataVersionService.incrementMetadataVersion(
         fieldMetadataInput.workspaceId,
       );
-      console.timeEnd('createOne increment');
-      console.timeEnd('createOne');
     }
   }
 
@@ -319,7 +308,7 @@ export class FieldMetadataService extends TypeOrmQueryService<FieldMetadataEntit
           FieldMetadataEntity,
         );
 
-      const [existingFieldMetadata] = await fieldMetadataRepository.find({
+      const existingFieldMetadata = await fieldMetadataRepository.findOne({
         where: {
           id,
           workspaceId: fieldMetadataInput.workspaceId,
@@ -333,14 +322,15 @@ export class FieldMetadataService extends TypeOrmQueryService<FieldMetadataEntit
         );
       }
 
-      const [objectMetadata] = await this.objectMetadataRepository.find({
-        where: {
-          id: existingFieldMetadata.objectMetadataId,
-          workspaceId: fieldMetadataInput.workspaceId,
-        },
-        relations: ['fields'],
-        order: {},
-      });
+      const objectMetadata =
+        await this.objectMetadataService.findOneWithinWorkspace(
+          fieldMetadataInput.workspaceId,
+          {
+            where: {
+              id: existingFieldMetadata?.objectMetadataId,
+            },
+          },
+        );
 
       if (!objectMetadata) {
         throw new FieldMetadataException(
@@ -485,7 +475,7 @@ export class FieldMetadataService extends TypeOrmQueryService<FieldMetadataEntit
           FieldMetadataEntity,
         );
 
-      const [fieldMetadata] = await fieldMetadataRepository.find({
+      const fieldMetadata = await fieldMetadataRepository.findOne({
         where: {
           id: input.id,
           workspaceId: workspaceId,
@@ -499,13 +489,12 @@ export class FieldMetadataService extends TypeOrmQueryService<FieldMetadataEntit
         );
       }
 
-      const [objectMetadata] = await this.objectMetadataRepository.find({
-        where: {
-          id: fieldMetadata.objectMetadataId,
-        },
-        relations: ['fields'],
-        order: {},
-      });
+      const objectMetadata =
+        await this.objectMetadataService.findOneWithinWorkspace(workspaceId, {
+          where: {
+            id: fieldMetadata?.objectMetadataId,
+          },
+        });
 
       if (!objectMetadata) {
         throw new FieldMetadataException(
@@ -594,7 +583,7 @@ export class FieldMetadataService extends TypeOrmQueryService<FieldMetadataEntit
     id: string,
     options?: FindOneOptions<FieldMetadataEntity>,
   ) {
-    const [fieldMetadata] = await this.fieldMetadataRepository.find({
+    const fieldMetadata = await this.fieldMetadataRepository.findOne({
       ...options,
       where: {
         ...options?.where,
@@ -616,15 +605,13 @@ export class FieldMetadataService extends TypeOrmQueryService<FieldMetadataEntit
     workspaceId: string,
     options: FindOneOptions<FieldMetadataEntity>,
   ) {
-    const [fieldMetadata] = await this.fieldMetadataRepository.find({
+    return this.fieldMetadataRepository.findOne({
       ...options,
       where: {
         ...options.where,
         workspaceId,
       },
     });
-
-    return fieldMetadata;
   }
 
   private buildUpdatableStandardFieldInput(

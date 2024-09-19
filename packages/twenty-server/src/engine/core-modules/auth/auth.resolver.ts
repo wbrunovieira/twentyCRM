@@ -16,14 +16,13 @@ import { UpdatePasswordViaResetTokenInput } from 'src/engine/core-modules/auth/d
 import { ValidatePasswordResetToken } from 'src/engine/core-modules/auth/dto/validate-password-reset-token.entity';
 import { ValidatePasswordResetTokenInput } from 'src/engine/core-modules/auth/dto/validate-password-reset-token.input';
 import { AuthGraphqlApiExceptionFilter } from 'src/engine/core-modules/auth/filters/auth-graphql-api-exception.filter';
-import { CaptchaGuard } from 'src/engine/core-modules/captcha/captcha.guard';
 import { UserService } from 'src/engine/core-modules/user/services/user.service';
 import { User } from 'src/engine/core-modules/user/user.entity';
 import { Workspace } from 'src/engine/core-modules/workspace/workspace.entity';
 import { AuthUser } from 'src/engine/decorators/auth/auth-user.decorator';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
-import { UserAuthGuard } from 'src/engine/guards/user-auth.guard';
-import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
+import { JwtAuthGuard } from 'src/engine/guards/jwt.auth.guard';
+import { CaptchaGuard } from 'src/engine/core-modules/captcha/captcha.guard';
 
 import { ChallengeInput } from './dto/challenge.input';
 import { ImpersonateInput } from './dto/impersonate.input';
@@ -37,7 +36,7 @@ import { VerifyInput } from './dto/verify.input';
 import { WorkspaceInviteHashValid } from './dto/workspace-invite-hash-valid.entity';
 import { WorkspaceInviteHashValidInput } from './dto/workspace-invite-hash.input';
 import { AuthService } from './services/auth.service';
-import { TokenService } from './token/services/token.service';
+import { TokenService } from './services/token.service';
 
 @Resolver()
 @UseFilters(AuthGraphqlApiExceptionFilter)
@@ -112,15 +111,11 @@ export class AuthResolver {
   }
 
   @Mutation(() => TransientToken)
-  @UseGuards(WorkspaceAuthGuard, UserAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async generateTransientToken(
     @AuthUser() user: User,
-    @AuthWorkspace() workspace: Workspace,
   ): Promise<TransientToken | void> {
-    const workspaceMember = await this.userService.loadWorkspaceMember(
-      user,
-      workspace,
-    );
+    const workspaceMember = await this.userService.loadWorkspaceMember(user);
 
     if (!workspaceMember) {
       return;
@@ -128,7 +123,7 @@ export class AuthResolver {
     const transientToken = await this.tokenService.generateTransientToken(
       workspaceMember.id,
       user.id,
-      user.defaultWorkspaceId,
+      user.defaultWorkspace.id,
     );
 
     return { transientToken };
@@ -146,7 +141,7 @@ export class AuthResolver {
   }
 
   @Mutation(() => AuthorizeApp)
-  @UseGuards(WorkspaceAuthGuard, UserAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async authorizeApp(
     @Args() authorizeAppInput: AuthorizeAppInput,
     @AuthUser() user: User,
@@ -160,7 +155,7 @@ export class AuthResolver {
   }
 
   @Mutation(() => AuthTokens)
-  @UseGuards(WorkspaceAuthGuard, UserAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async generateJWT(
     @AuthUser() user: User,
     @Args() args: GenerateJwtInput,
@@ -182,7 +177,7 @@ export class AuthResolver {
     return { tokens: tokens };
   }
 
-  @UseGuards(WorkspaceAuthGuard, UserAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Mutation(() => Verify)
   async impersonate(
     @Args() impersonateInput: ImpersonateInput,
@@ -191,7 +186,7 @@ export class AuthResolver {
     return await this.authService.impersonate(impersonateInput.userId, user);
   }
 
-  @UseGuards(WorkspaceAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Mutation(() => ApiKeyToken)
   async generateApiKeyToken(
     @Args() args: ApiKeyTokenInput,

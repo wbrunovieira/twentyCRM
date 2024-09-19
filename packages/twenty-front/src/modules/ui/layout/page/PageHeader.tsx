@@ -34,9 +34,7 @@ const StyledTopBarContainer = styled.div<{ width?: number }>`
   width: ${({ width }) => width + 'px' || '100%'};
 
   @media (max-width: ${MOBILE_VIEWPORT}px) {
-    width: 100%;
-    box-sizing: border-box;
-    padding: ${({ theme }) => theme.spacing(3)};
+    padding-left: ${({ theme }) => theme.spacing(3)};
   }
 `;
 
@@ -89,7 +87,7 @@ type PageHeaderProps = {
   hasNextRecord?: boolean;
   navigateToPreviousRecord?: () => void;
   navigateToNextRecord?: () => void;
-  Icon?: IconComponent;
+  Icon: IconComponent;
   children?: ReactNode;
   width?: number;
 };

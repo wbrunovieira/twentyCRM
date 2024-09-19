@@ -29,8 +29,7 @@ export type BasicFieldMetadataType =
   | FieldMetadataType.POSITION
   | FieldMetadataType.DATE_TIME
   | FieldMetadataType.DATE
-  | FieldMetadataType.POSITION
-  | FieldMetadataType.ARRAY;
+  | FieldMetadataType.POSITION;
 
 @Injectable()
 export class BasicColumnActionFactory extends ColumnActionAbstractFactory<BasicFieldMetadataType> {
@@ -49,7 +48,6 @@ export class BasicColumnActionFactory extends ColumnActionAbstractFactory<BasicF
         action: WorkspaceMigrationColumnActionType.CREATE,
         columnName,
         columnType: fieldMetadataTypeToColumnType(fieldMetadata.type),
-        isArray: fieldMetadata.type === FieldMetadataType.ARRAY,
         isNullable: fieldMetadata.isNullable ?? true,
         defaultValue: serializedDefaultValue,
       },
@@ -83,7 +81,6 @@ export class BasicColumnActionFactory extends ColumnActionAbstractFactory<BasicF
         currentColumnDefinition: {
           columnName: currentColumnName,
           columnType: fieldMetadataTypeToColumnType(currentFieldMetadata.type),
-          isArray: currentFieldMetadata.type === FieldMetadataType.ARRAY,
           isNullable: currentFieldMetadata.isNullable ?? true,
           defaultValue: serializeDefaultValue(
             currentFieldMetadata.defaultValue,
@@ -92,7 +89,6 @@ export class BasicColumnActionFactory extends ColumnActionAbstractFactory<BasicF
         alteredColumnDefinition: {
           columnName: alteredColumnName,
           columnType: fieldMetadataTypeToColumnType(alteredFieldMetadata.type),
-          isArray: alteredFieldMetadata.type === FieldMetadataType.ARRAY,
           isNullable: alteredFieldMetadata.isNullable ?? true,
           defaultValue: serializedDefaultValue,
         },

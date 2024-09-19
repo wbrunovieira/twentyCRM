@@ -18,7 +18,6 @@ import { FieldMetadataSettings } from 'src/engine/metadata-modules/field-metadat
 
 import { OrderByDirectionType } from 'src/engine/api/graphql/workspace-schema-builder/graphql-types/enum';
 import {
-  ArrayFilterType,
   BigFloatFilterType,
   BooleanFilterType,
   DateFilterType,
@@ -46,8 +45,6 @@ export interface TypeOptions<T = any> {
   isIdField?: boolean;
 }
 
-const StringArrayScalarType = new GraphQLList(GraphQLString);
-
 @Injectable()
 export class TypeMapperService {
   mapToScalarType(
@@ -58,6 +55,7 @@ export class TypeMapperService {
     if (isIdField || settings?.isForeignKey) {
       return GraphQLID;
     }
+
     const typeScalarMapping = new Map<FieldMetadataType, GraphQLScalarType>([
       [FieldMetadataType.UUID, UUIDScalarType],
       [FieldMetadataType.TEXT, GraphQLString],
@@ -76,10 +74,6 @@ export class TypeMapperService {
       [FieldMetadataType.NUMERIC, BigFloatScalarType],
       [FieldMetadataType.POSITION, PositionScalarType],
       [FieldMetadataType.RAW_JSON, RawJSONScalar],
-      [
-        FieldMetadataType.ARRAY,
-        StringArrayScalarType as unknown as GraphQLScalarType,
-      ],
       [FieldMetadataType.RICH_TEXT, GraphQLString],
     ]);
 
@@ -117,7 +111,6 @@ export class TypeMapperService {
       [FieldMetadataType.POSITION, FloatFilterType],
       [FieldMetadataType.RAW_JSON, RawJsonFilterType],
       [FieldMetadataType.RICH_TEXT, StringFilterType],
-      [FieldMetadataType.ARRAY, ArrayFilterType],
     ]);
 
     return typeFilterMapping.get(fieldMetadataType);
@@ -142,7 +135,6 @@ export class TypeMapperService {
       [FieldMetadataType.POSITION, OrderByDirectionType],
       [FieldMetadataType.RAW_JSON, OrderByDirectionType],
       [FieldMetadataType.RICH_TEXT, OrderByDirectionType],
-      [FieldMetadataType.ARRAY, OrderByDirectionType],
     ]);
 
     return typeOrderByMapping.get(fieldMetadataType);

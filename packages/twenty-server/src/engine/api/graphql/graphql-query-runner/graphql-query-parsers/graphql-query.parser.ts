@@ -1,6 +1,7 @@
 import {
   FindOptionsOrderValue,
   FindOptionsWhere,
+  IsNull,
   ObjectLiteral,
 } from 'typeorm';
 
@@ -16,7 +17,7 @@ import { GraphqlQuerySelectedFieldsParser } from 'src/engine/api/graphql/graphql
 import {
   FieldMetadataMap,
   ObjectMetadataMap,
-} from 'src/engine/metadata-modules/utils/generate-object-metadata-map.util';
+} from 'src/engine/api/graphql/graphql-query-runner/utils/convert-object-metadata-to-map.util';
 
 export class GraphqlQueryParser {
   private fieldMetadataMap: FieldMetadataMap;
@@ -30,48 +31,46 @@ export class GraphqlQueryParser {
     this.fieldMetadataMap = fieldMetadataMap;
   }
 
-  parseFilter(recordFilter: RecordFilter): {
-    parsedFilters:
-      | FindOptionsWhere<ObjectLiteral>
-      | FindOptionsWhere<ObjectLiteral>[];
-    withDeleted: boolean;
-  } {
+  parseFilter(
+    recordFilter: RecordFilter,
+    shouldAddDefaultSoftDeleteCondition = false,
+  ): FindOptionsWhere<ObjectLiteral> | FindOptionsWhere<ObjectLiteral>[] {
     const graphqlQueryFilterParser = new GraphqlQueryFilterParser(
       this.fieldMetadataMap,
     );
 
     const parsedFilter = graphqlQueryFilterParser.parse(recordFilter);
 
-    const hasDeletedAtFilter = this.checkForDeletedAtFilter(parsedFilter);
+    if (
+      !shouldAddDefaultSoftDeleteCondition ||
+      !('deletedAt' in this.fieldMetadataMap)
+    ) {
+      return parsedFilter;
+    }
 
-    return {
-      parsedFilters: parsedFilter,
-      withDeleted: hasDeletedAtFilter,
-    };
+    return this.addDefaultSoftDeleteCondition(parsedFilter);
   }
 
-  private checkForDeletedAtFilter(
+  private addDefaultSoftDeleteCondition(
     filter: FindOptionsWhere<ObjectLiteral> | FindOptionsWhere<ObjectLiteral>[],
-  ): boolean {
+  ): FindOptionsWhere<ObjectLiteral> | FindOptionsWhere<ObjectLiteral>[] {
     if (Array.isArray(filter)) {
-      return filter.some(this.checkForDeletedAtFilter);
+      return filter.map((condition) =>
+        this.addSoftDeleteToCondition(condition),
+      );
     }
 
-    for (const [key, value] of Object.entries(filter)) {
-      if (key === 'deletedAt') {
-        return true;
-      }
+    return this.addSoftDeleteToCondition(filter);
+  }
 
-      if (typeof value === 'object' && value !== null) {
-        if (
-          this.checkForDeletedAtFilter(value as FindOptionsWhere<ObjectLiteral>)
-        ) {
-          return true;
-        }
-      }
+  private addSoftDeleteToCondition(
+    condition: FindOptionsWhere<ObjectLiteral>,
+  ): FindOptionsWhere<ObjectLiteral> {
+    if (!('deletedAt' in condition)) {
+      return { ...condition, deletedAt: IsNull() };
     }
 
-    return false;
+    return condition;
   }
 
   parseOrder(

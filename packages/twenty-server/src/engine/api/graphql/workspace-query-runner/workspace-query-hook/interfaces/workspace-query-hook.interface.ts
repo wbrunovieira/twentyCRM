@@ -9,11 +9,3 @@ export interface WorkspaceQueryHookInstance {
     payload: ResolverArgs,
   ): Promise<ResolverArgs>;
 }
-
-export interface WorkspaceQueryPostHookInstance {
-  execute(
-    authContext: AuthContext,
-    objectName: string,
-    payload: unknown[],
-  ): Promise<void>;
-}

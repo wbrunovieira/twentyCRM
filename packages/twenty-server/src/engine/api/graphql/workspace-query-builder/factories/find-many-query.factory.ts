@@ -34,7 +34,7 @@ export class FindManyQueryFactory {
     const argsString = this.argsStringFactory.create(
       args,
       options.fieldMetadataCollection,
-      !options.withSoftDeleted,
+      !options.withSoftDeleted && !!options.objectMetadataItem.isSoftDeletable,
     );
 
     return `

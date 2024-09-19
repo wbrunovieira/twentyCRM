@@ -6,9 +6,12 @@ import {
   WorkflowVersionStatus,
   WorkflowVersionWorkspaceEntity,
 } from 'src/modules/workflow/common/standard-objects/workflow-version.workspace-entity';
+import { WorkflowTrigger } from 'src/modules/workflow/workflow-trigger/types/workflow-trigger.type';
 
 export const assertWorkflowVersionIsDraft = (
-  workflowVersion: WorkflowVersionWorkspaceEntity,
+  workflowVersion: Omit<WorkflowVersionWorkspaceEntity, 'trigger'> & {
+    trigger: WorkflowTrigger;
+  },
 ) => {
   if (workflowVersion.status !== WorkflowVersionStatus.DRAFT) {
     throw new WorkflowQueryValidationException(

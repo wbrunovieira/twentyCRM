@@ -27,11 +27,6 @@ export const useFilteredObjectMetadataItems = () => {
     ({ isActive, isSystem }) => !isActive && !isSystem,
   );
 
-  const findObjectMetadataItemBySlug = (slug: string) =>
-    objectMetadataItems.find(
-      (objectMetadataItem) => getObjectSlug(objectMetadataItem) === slug,
-    );
-
   const findActiveObjectMetadataItemBySlug = (slug: string) =>
     activeObjectMetadataItems.find(
       (activeObjectMetadataItem) =>
@@ -55,7 +50,6 @@ export const useFilteredObjectMetadataItems = () => {
     findObjectMetadataItemByNamePlural,
     inactiveObjectMetadataItems,
     objectMetadataItems,
-    findObjectMetadataItemBySlug,
     alphaSortedActiveObjectMetadataItems,
   };
 };

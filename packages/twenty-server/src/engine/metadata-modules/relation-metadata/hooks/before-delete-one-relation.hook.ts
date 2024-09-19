@@ -19,7 +19,7 @@ export class BeforeDeleteOneRelation implements BeforeDeleteOneHook {
     instance: DeleteOneInputType,
     context: any,
   ): Promise<DeleteOneInputType> {
-    const workspaceId = context?.req?.workspace?.id;
+    const workspaceId = context?.req?.user?.workspace?.id;
 
     if (!workspaceId) {
       throw new UnauthorizedException();

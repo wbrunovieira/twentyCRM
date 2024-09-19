@@ -11,8 +11,6 @@ import { useUpdateOneRecord } from '@/object-record/hooks/useUpdateOneRecord';
 import { SaveAndCancelButtons } from '@/settings/components/SaveAndCancelButtons/SaveAndCancelButtons';
 import { SettingsPageContainer } from '@/settings/components/SettingsPageContainer';
 import { Webhook } from '@/settings/developers/types/webhook/Webhook';
-import { getSettingsPagePath } from '@/settings/utils/getSettingsPagePath';
-import { SettingsPath } from '@/types/SettingsPath';
 import { Button } from '@/ui/input/button/components/Button';
 import { Select } from '@/ui/input/components/Select';
 import { TextArea } from '@/ui/input/components/TextArea';
@@ -20,6 +18,7 @@ import { TextInput } from '@/ui/input/components/TextInput';
 import { ConfirmationModal } from '@/ui/layout/modal/components/ConfirmationModal';
 import { SubMenuTopBarContainer } from '@/ui/layout/page/SubMenuTopBarContainer';
 import { Section } from '@/ui/layout/section/components/Section';
+import { Breadcrumb } from '@/ui/navigation/bread-crumb/components/Breadcrumb';
 
 const StyledFilterRow = styled.div`
   display: flex;
@@ -56,11 +55,9 @@ export const SettingsDevelopersWebhooksDetail = () => {
     objectNameSingular: CoreObjectNameSingular.Webhook,
   });
 
-  const developerPath = getSettingsPagePath(SettingsPath.Developers);
-
   const deleteWebhook = () => {
     deleteOneWebhook(webhookId);
-    navigate(developerPath);
+    navigate('/settings/developers');
   };
 
   const fieldTypeOptions = [
@@ -84,7 +81,7 @@ export const SettingsDevelopersWebhooksDetail = () => {
         description: description,
       },
     });
-    navigate(developerPath);
+    navigate('/settings/developers');
   };
 
   return (
@@ -92,23 +89,19 @@ export const SettingsDevelopersWebhooksDetail = () => {
       {webhookData?.targetUrl && (
         <SubMenuTopBarContainer
           Icon={IconCode}
-          title={webhookData.targetUrl}
-          links={[
-            {
-              children: 'Workspace',
-              href: getSettingsPagePath(SettingsPath.Workspace),
-            },
-            {
-              children: 'Developers',
-              href: developerPath,
-            },
-            { children: 'Webhook' },
-          ]}
+          title={
+            <Breadcrumb
+              links={[
+                { children: 'Developers', href: '/settings/developers' },
+                { children: 'Webhook' },
+              ]}
+            />
+          }
           actionButton={
             <SaveAndCancelButtons
               isSaveDisabled={!isDirty}
               onCancel={() => {
-                navigate(developerPath);
+                navigate('/settings/developers');
               }}
               onSave={handleSave}
             />

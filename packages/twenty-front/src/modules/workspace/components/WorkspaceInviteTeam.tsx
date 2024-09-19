@@ -1,9 +1,9 @@
-import styled from '@emotion/styled';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import styled from '@emotion/styled';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Key } from 'ts-key-enum';
-import { IconSend } from 'twenty-ui';
+import { IconMail, IconSend } from 'twenty-ui';
 import { z } from 'zod';
 
 import { SnackBarVariant } from '@/ui/feedback/snack-bar-manager/components/SnackBar';
@@ -11,13 +11,12 @@ import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 import { Button } from '@/ui/input/button/components/Button';
 import { TextInput } from '@/ui/input/components/TextInput';
 import { sanitizeEmailList } from '@/workspace/utils/sanitizeEmailList';
+import { useSendInviteLinkMutation } from '~/generated/graphql';
 import { isDefined } from '~/utils/isDefined';
-import { useCreateWorkspaceInvitation } from '../../workspace-invitation/hooks/useCreateWorkspaceInvitation';
 
 const StyledContainer = styled.div`
   display: flex;
   flex-direction: row;
-  padding-bottom: ${({ theme }) => theme.spacing(3)};
 `;
 
 const StyledLinkContainer = styled.div`
@@ -70,7 +69,7 @@ type FormInput = {
 
 export const WorkspaceInviteTeam = () => {
   const { enqueueSnackBar } = useSnackBar();
-  const { sendInvitation } = useCreateWorkspaceInvitation();
+  const [sendInviteLink] = useSendInviteLinkMutation();
 
   const { reset, handleSubmit, control, formState } = useForm<FormInput>({
     mode: 'onSubmit',
@@ -80,27 +79,16 @@ export const WorkspaceInviteTeam = () => {
     },
   });
 
-  const submit = handleSubmit(async ({ emails }) => {
-    const emailsList = sanitizeEmailList(emails.split(','));
-    const { data } = await sendInvitation({ emails: emailsList });
-    if (isDefined(data) && data.sendInvitations.result.length > 0) {
-      enqueueSnackBar(
-        `${data.sendInvitations.result.length} invitations sent`,
-        {
-          variant: SnackBarVariant.Success,
-          duration: 2000,
-        },
-      );
-      return;
+  const submit = handleSubmit(async (data) => {
+    const emailsList = sanitizeEmailList(data.emails.split(','));
+    const result = await sendInviteLink({ variables: { emails: emailsList } });
+    if (isDefined(result.errors)) {
+      throw result.errors;
     }
-    if (isDefined(data) && !data.sendInvitations.success) {
-      data.sendInvitations.errors.forEach((error) => {
-        enqueueSnackBar(error, {
-          variant: SnackBarVariant.Error,
-          duration: 5000,
-        });
-      });
-    }
+    enqueueSnackBar('Invite link sent to email addresses', {
+      variant: SnackBarVariant.Success,
+      duration: 2000,
+    });
   });
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -128,6 +116,7 @@ export const WorkspaceInviteTeam = () => {
               return (
                 <TextInput
                   placeholder="tim@apple.com, jony.ive@apple.dev"
+                  LeftIcon={IconMail}
                   value={value}
                   onChange={onChange}
                   error={error?.message}

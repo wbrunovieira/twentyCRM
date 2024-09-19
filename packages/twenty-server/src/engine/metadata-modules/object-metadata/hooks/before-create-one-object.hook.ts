@@ -15,7 +15,7 @@ export class BeforeCreateOneObject<T extends CreateObjectInput>
     instance: CreateOneInputType<T>,
     context: any,
   ): Promise<CreateOneInputType<T>> {
-    const workspaceId = context?.req?.workspace?.id;
+    const workspaceId = context?.req?.user?.workspace?.id;
 
     if (!workspaceId) {
       throw new UnauthorizedException();

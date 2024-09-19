@@ -12,8 +12,7 @@ import { MicrosoftAuthController } from 'src/engine/core-modules/auth/controller
 import { VerifyAuthController } from 'src/engine/core-modules/auth/controllers/verify-auth.controller';
 import { GoogleAPIsService } from 'src/engine/core-modules/auth/services/google-apis.service';
 import { SignInUpService } from 'src/engine/core-modules/auth/services/sign-in-up.service';
-import { TokenService } from 'src/engine/core-modules/auth/token/services/token.service';
-import { TokenModule } from 'src/engine/core-modules/auth/token/token.module';
+import { TokenService } from 'src/engine/core-modules/auth/services/token.service';
 import { FeatureFlagEntity } from 'src/engine/core-modules/feature-flag/feature-flag.entity';
 import { FileUploadModule } from 'src/engine/core-modules/file/file-upload/file-upload.module';
 import { JwtModule } from 'src/engine/core-modules/jwt/jwt.module';
@@ -51,7 +50,6 @@ import { JwtAuthStrategy } from './strategies/jwt.auth.strategy';
       ConnectedAccountWorkspaceEntity,
     ]),
     HttpModule,
-    TokenModule,
     UserWorkspaceModule,
     WorkspaceModule,
     OnboardingModule,
@@ -67,9 +65,9 @@ import { JwtAuthStrategy } from './strategies/jwt.auth.strategy';
   providers: [
     SignInUpService,
     AuthService,
+    TokenService,
     JwtAuthStrategy,
     AuthResolver,
-    TokenService,
     GoogleAPIsService,
     AppTokenService,
   ],

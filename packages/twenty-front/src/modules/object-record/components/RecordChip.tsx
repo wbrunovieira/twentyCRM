@@ -4,7 +4,6 @@ import { getLinkToShowPage } from '@/object-metadata/utils/getLinkToShowPage';
 import { useRecordChipData } from '@/object-record/hooks/useRecordChipData';
 import { ObjectRecord } from '@/object-record/types/ObjectRecord';
 import { UndecoratedLink } from '@/ui/navigation/link/components/UndecoratedLink';
-import { MouseEvent } from 'react';
 
 export type RecordChipProps = {
   objectNameSingular: string;
@@ -24,15 +23,8 @@ export const RecordChip = ({
     record,
   });
 
-  const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
-    e.stopPropagation();
-  };
-
   return (
-    <UndecoratedLink
-      onClick={handleClick}
-      to={getLinkToShowPage(objectNameSingular, record)}
-    >
+    <UndecoratedLink to={getLinkToShowPage(objectNameSingular, record)}>
       <AvatarChip
         placeholderColorSeed={record.id}
         name={recordChipData.name}

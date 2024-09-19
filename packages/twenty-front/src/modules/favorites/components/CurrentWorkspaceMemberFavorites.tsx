@@ -11,7 +11,7 @@ import { NavigationDrawerSection } from '@/ui/navigation/navigation-drawer/compo
 import { NavigationDrawerSectionTitle } from '@/ui/navigation/navigation-drawer/components/NavigationDrawerSectionTitle';
 import { useNavigationSection } from '@/ui/navigation/navigation-drawer/hooks/useNavigationSection';
 
-import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
+import { currentUserState } from '@/auth/states/currentUserState';
 import { useFavorites } from '../hooks/useFavorites';
 
 const StyledContainer = styled(NavigationDrawerSection)`
@@ -35,7 +35,7 @@ const StyledNavigationDrawerItem = styled(NavigationDrawerItem)`
 `;
 
 export const CurrentWorkspaceMemberFavorites = () => {
-  const currentWorkspaceMember = useRecoilValue(currentWorkspaceMemberState);
+  const currentUser = useRecoilValue(currentUserState);
 
   const { favorites, handleReorderFavorite } = useFavorites();
   const loading = useIsPrefetchLoading();
@@ -44,12 +44,12 @@ export const CurrentWorkspaceMemberFavorites = () => {
     useNavigationSection('Favorites');
   const isNavigationSectionOpen = useRecoilValue(isNavigationSectionOpenState);
 
-  if (loading && isDefined(currentWorkspaceMember)) {
+  if (loading && isDefined(currentUser)) {
     return <FavoritesSkeletonLoader />;
   }
 
   const currentWorkspaceMemberFavorites = favorites.filter(
-    (favorite) => favorite.workspaceMemberId === currentWorkspaceMember?.id,
+    (favorite) => favorite.workspaceMemberId === currentUser?.id,
   );
 
   if (

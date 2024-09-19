@@ -9,6 +9,5 @@ export type Favorite = {
   avatarType: AvatarType;
   link: string;
   recordId: string;
-  workspaceMemberId: string;
   __typename: 'Favorite';
 };

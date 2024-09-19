@@ -1,6 +1,7 @@
 import { SaveAndCancelButtons } from '@/settings/components/SaveAndCancelButtons/SaveAndCancelButtons';
 import { SettingsPageContainer } from '@/settings/components/SettingsPageContainer';
 import { SubMenuTopBarContainer } from '@/ui/layout/page/SubMenuTopBarContainer';
+import { Breadcrumb } from '@/ui/navigation/bread-crumb/components/Breadcrumb';
 import { useNavigate } from 'react-router-dom';
 
 import { SettingsServerlessFunctionNewForm } from '@/settings/serverless-functions/components/SettingsServerlessFunctionNewForm';
@@ -80,18 +81,14 @@ export const SettingsServerlessFunctionsNew = () => {
   return (
     <SubMenuTopBarContainer
       Icon={IconFunction}
-      title="New Function"
-      links={[
-        {
-          children: 'Workspace',
-          href: getSettingsPagePath(SettingsPath.Workspace),
-        },
-        {
-          children: 'Functions',
-          href: getSettingsPagePath(SettingsPath.ServerlessFunctions),
-        },
-        { children: 'New' },
-      ]}
+      title={
+        <Breadcrumb
+          links={[
+            { children: 'Functions', href: '/settings/functions' },
+            { children: 'New' },
+          ]}
+        />
+      }
       actionButton={
         <SaveAndCancelButtons
           isSaveDisabled={!canSave}

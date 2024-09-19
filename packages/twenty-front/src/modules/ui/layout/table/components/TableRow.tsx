@@ -9,13 +9,12 @@ const StyledTableRow = styled('div', {
   isSelected?: boolean;
   onClick?: () => void;
   to?: string;
-  gridAutoColumns?: string;
 }>`
   background-color: ${({ isSelected, theme }) =>
     isSelected ? theme.accent.quaternary : 'transparent'};
   border-radius: ${({ theme }) => theme.border.radius.sm};
   display: grid;
-  grid-auto-columns: ${({ gridAutoColumns }) => gridAutoColumns ?? '1fr'};
+  grid-auto-columns: 1fr;
   grid-auto-flow: column;
   transition: background-color
     ${({ theme }) => theme.animation.duration.normal}s;
@@ -34,7 +33,6 @@ type TableRowProps = {
   onClick?: () => void;
   to?: string;
   className?: string;
-  gridAutoColumns?: string;
 };
 
 export const TableRow = ({
@@ -43,12 +41,10 @@ export const TableRow = ({
   to,
   className,
   children,
-  gridAutoColumns,
 }: React.PropsWithChildren<TableRowProps>) => (
   <StyledTableRow
     isSelected={isSelected}
     onClick={onClick}
-    gridAutoColumns={gridAutoColumns}
     className={className}
     to={to}
     as={to ? Link : 'div'}

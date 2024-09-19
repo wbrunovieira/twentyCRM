@@ -6,8 +6,6 @@ import { isFieldActor } from '@/object-record/record-field/types/guards/isFieldA
 import { isFieldActorValue } from '@/object-record/record-field/types/guards/isFieldActorValue';
 import { isFieldAddress } from '@/object-record/record-field/types/guards/isFieldAddress';
 import { isFieldAddressValue } from '@/object-record/record-field/types/guards/isFieldAddressValue';
-import { isFieldArray } from '@/object-record/record-field/types/guards/isFieldArray';
-import { isFieldArrayValue } from '@/object-record/record-field/types/guards/isFieldArrayValue';
 import { isFieldBoolean } from '@/object-record/record-field/types/guards/isFieldBoolean';
 import { isFieldCurrency } from '@/object-record/record-field/types/guards/isFieldCurrency';
 import { isFieldCurrencyValue } from '@/object-record/record-field/types/guards/isFieldCurrencyValue';
@@ -78,9 +76,8 @@ export const isFieldValueEmpty = ({
     );
   }
 
-  if (isFieldMultiSelect(fieldDefinition) || isFieldArray(fieldDefinition)) {
+  if (isFieldMultiSelect(fieldDefinition)) {
     return (
-      !isFieldArrayValue(fieldValue) ||
       !isFieldMultiSelectValue(fieldValue, selectOptionValues) ||
       !isDefined(fieldValue)
     );

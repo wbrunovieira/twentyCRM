@@ -57,26 +57,6 @@ describe('useFilteredObjectMetadataItems', () => {
     });
   });
 
-  it('should findObjectMetadataItemBySlug', async () => {
-    const { result } = renderHook(
-      () => {
-        const setMetadataItems = useSetRecoilState(objectMetadataItemsState);
-        setMetadataItems(mockObjectMetadataItems);
-
-        return useFilteredObjectMetadataItems();
-      },
-      {
-        wrapper: Wrapper,
-      },
-    );
-
-    act(() => {
-      const res = result.current.findObjectMetadataItemBySlug('people');
-      expect(res).toBeDefined();
-      expect(res?.namePlural).toBe('people');
-    });
-  });
-
   it('should findObjectMetadataItemById', async () => {
     const { result } = renderHook(
       () => {

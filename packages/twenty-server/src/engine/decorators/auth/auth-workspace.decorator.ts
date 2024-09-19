@@ -6,6 +6,6 @@ export const AuthWorkspace = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const request = getRequest(ctx);
 
-    return request.workspace;
+    return request.user ? request.user.workspace : undefined;
   },
 );

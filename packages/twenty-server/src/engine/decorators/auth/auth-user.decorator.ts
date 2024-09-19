@@ -14,10 +14,10 @@ export const AuthUser = createParamDecorator(
   (options: DecoratorOptions | undefined, ctx: ExecutionContext) => {
     const request = getRequest(ctx);
 
-    if (!options?.allowUndefined && !request.user) {
+    if (!options?.allowUndefined && (!request.user || !request.user.user)) {
       throw new ForbiddenException("You're not authorized to do this");
     }
 
-    return request.user;
+    return request.user ? request.user.user : undefined;
   },
 );

@@ -15,7 +15,7 @@ import {
 import { Workspace } from 'src/engine/core-modules/workspace/workspace.entity';
 import { IDataloaders } from 'src/engine/dataloaders/dataloader.interface';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
-import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
+import { JwtAuthGuard } from 'src/engine/guards/jwt.auth.guard';
 import { CreateOneFieldMetadataInput } from 'src/engine/metadata-modules/field-metadata/dtos/create-field.input';
 import { DeleteOneFieldInput } from 'src/engine/metadata-modules/field-metadata/dtos/delete-field.input';
 import { FieldMetadataDTO } from 'src/engine/metadata-modules/field-metadata/dtos/field-metadata.dto';
@@ -25,7 +25,7 @@ import { FieldMetadataType } from 'src/engine/metadata-modules/field-metadata/fi
 import { FieldMetadataService } from 'src/engine/metadata-modules/field-metadata/field-metadata.service';
 import { fieldMetadataGraphqlApiExceptionHandler } from 'src/engine/metadata-modules/field-metadata/utils/field-metadata-graphql-api-exception-handler.util';
 
-@UseGuards(WorkspaceAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Resolver(() => FieldMetadataDTO)
 export class FieldMetadataResolver {
   constructor(private readonly fieldMetadataService: FieldMetadataService) {}
@@ -103,7 +103,6 @@ export class FieldMetadataResolver {
 
   @ResolveField(() => RelationDefinitionDTO, { nullable: true })
   async relationDefinition(
-    @AuthWorkspace() workspace: Workspace,
     @Parent() fieldMetadata: FieldMetadataDTO,
     @Context() context: { loaders: IDataloaders },
   ): Promise<RelationDefinitionDTO | null | undefined> {
@@ -113,10 +112,7 @@ export class FieldMetadataResolver {
 
     try {
       const relationMetadataItem =
-        await context.loaders.relationMetadataLoader.load({
-          fieldMetadata,
-          workspaceId: workspace.id,
-        });
+        await context.loaders.relationMetadataLoader.load(fieldMetadata.id);
 
       return await this.fieldMetadataService.getRelationDefinitionFromRelationMetadata(
         fieldMetadata,

@@ -39,7 +39,6 @@ import { llmTracingModuleFactory } from 'src/engine/core-modules/llm-tracing/llm
 import { ServerlessModule } from 'src/engine/core-modules/serverless/serverless.module';
 import { serverlessModuleFactory } from 'src/engine/core-modules/serverless/serverless-module.factory';
 import { FileStorageService } from 'src/engine/core-modules/file-storage/file-storage.service';
-import { WorkspaceInvitationModule } from 'src/engine/core-modules/workspace-invitation/workspace-invitation.module';
 
 import { FileModule } from './file/file.module';
 import { ClientConfigModule } from './client-config/client-config.module';
@@ -60,7 +59,6 @@ import { AnalyticsModule } from './analytics/analytics.module';
     TimelineCalendarEventModule,
     UserModule,
     WorkspaceModule,
-    WorkspaceInvitationModule,
     AISQLQueryModule,
     PostgresCredentialsModule,
     WorkflowTriggerApiModule,
@@ -116,7 +114,6 @@ import { AnalyticsModule } from './analytics/analytics.module';
     TimelineCalendarEventModule,
     UserModule,
     WorkspaceModule,
-    WorkspaceInvitationModule,
   ],
 })
 export class CoreEngineModule {}

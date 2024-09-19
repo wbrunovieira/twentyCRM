@@ -1,8 +1,8 @@
+import { useMemo } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useApolloClient } from '@apollo/client';
 import { isNonEmptyString } from '@sniptt/guards';
 import qs from 'qs';
-import { useMemo } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
 import { useRecoilCallback, useRecoilValue } from 'recoil';
 import z from 'zod';
 
@@ -92,12 +92,12 @@ export const useViewFromQueryParams = () => {
                 if (isUndefinedOrNull(filterDefinition)) return null;
 
                 const relationObjectMetadataNameSingular =
-                  fieldMetadataItem.relationDefinition?.targetObjectMetadata
-                    ?.nameSingular;
+                  fieldMetadataItem.toRelationMetadata?.fromObjectMetadata
+                    .nameSingular;
 
                 const relationObjectMetadataNamePlural =
-                  fieldMetadataItem.relationDefinition?.targetObjectMetadata
-                    ?.namePlural;
+                  fieldMetadataItem.toRelationMetadata?.fromObjectMetadata
+                    .namePlural;
 
                 const relationObjectMetadataItem =
                   relationObjectMetadataNameSingular

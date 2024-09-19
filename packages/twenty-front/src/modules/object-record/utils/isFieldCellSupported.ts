@@ -1,16 +1,12 @@
 import { CoreObjectNameSingular } from '@/object-metadata/types/CoreObjectNameSingular';
 import { FieldMetadataItem } from '@/object-metadata/types/FieldMetadataItem';
-import { ObjectMetadataItem } from '@/object-metadata/types/ObjectMetadataItem';
 import { isObjectMetadataAvailableForRelation } from '@/object-metadata/utils/isObjectMetadataAvailableForRelation';
 import {
   FieldMetadataType,
-  RelationDefinitionType,
+  RelationMetadataType,
 } from '~/generated-metadata/graphql';
 
-export const isFieldCellSupported = (
-  fieldMetadataItem: FieldMetadataItem,
-  objectMetadataItems: ObjectMetadataItem[],
-) => {
+export const isFieldCellSupported = (fieldMetadataItem: FieldMetadataItem) => {
   if (
     [
       FieldMetadataType.Uuid,
@@ -22,17 +18,17 @@ export const isFieldCellSupported = (
   }
 
   if (fieldMetadataItem.type === FieldMetadataType.Relation) {
-    const relationObjectMetadataItemId =
-      fieldMetadataItem.relationDefinition?.targetObjectMetadata.id;
-
-    const relationObjectMetadataItem = objectMetadataItems.find(
-      (item) => item.id === relationObjectMetadataItemId,
-    );
+    const relationMetadata =
+      fieldMetadataItem.fromRelationMetadata ??
+      fieldMetadataItem.toRelationMetadata;
+    const relationObjectMetadataItem =
+      fieldMetadataItem.fromRelationMetadata?.toObjectMetadata ??
+      fieldMetadataItem.toRelationMetadata?.fromObjectMetadata;
 
     // Hack to display targets on Notes and Tasks
     if (
-      fieldMetadataItem.relationDefinition?.targetObjectMetadata
-        ?.nameSingular === CoreObjectNameSingular.NoteTarget &&
+      fieldMetadataItem.fromRelationMetadata?.toObjectMetadata?.nameSingular ===
+        CoreObjectNameSingular.NoteTarget &&
       fieldMetadataItem.relationDefinition?.sourceObjectMetadata
         .nameSingular === CoreObjectNameSingular.Note
     ) {
@@ -40,8 +36,8 @@ export const isFieldCellSupported = (
     }
 
     if (
-      fieldMetadataItem.relationDefinition?.targetObjectMetadata
-        ?.nameSingular === CoreObjectNameSingular.TaskTarget &&
+      fieldMetadataItem.fromRelationMetadata?.toObjectMetadata?.nameSingular ===
+        CoreObjectNameSingular.TaskTarget &&
       fieldMetadataItem.relationDefinition?.sourceObjectMetadata
         .nameSingular === CoreObjectNameSingular.Task
     ) {
@@ -49,10 +45,9 @@ export const isFieldCellSupported = (
     }
 
     if (
-      !fieldMetadataItem.relationDefinition ||
+      !relationMetadata ||
       // TODO: Many to many relations are not supported yet.
-      fieldMetadataItem.relationDefinition.direction ===
-        RelationDefinitionType.ManyToMany ||
+      relationMetadata.relationType === RelationMetadataType.ManyToMany ||
       !relationObjectMetadataItem ||
       !isObjectMetadataAvailableForRelation(relationObjectMetadataItem)
     ) {

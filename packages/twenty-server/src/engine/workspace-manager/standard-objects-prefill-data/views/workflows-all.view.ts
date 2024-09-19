@@ -9,7 +9,7 @@ export const workflowsAllView = async (
     name: 'All Workflows',
     objectMetadataId: objectMetadataMap[STANDARD_OBJECT_IDS.workflow].id,
     type: 'table',
-    key: 'INDEX',
+    key: null,
     position: 0,
     icon: 'IconSettingsAutomation',
     kanbanFieldMetadataId: '',

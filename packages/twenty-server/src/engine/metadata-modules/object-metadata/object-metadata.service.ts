@@ -10,6 +10,7 @@ import { FindManyOptions, FindOneOptions, In, Repository } from 'typeorm';
 import { FieldMetadataSettings } from 'src/engine/metadata-modules/field-metadata/interfaces/field-metadata-settings.interface';
 
 import { TypeORMService } from 'src/database/typeorm/typeorm.service';
+import { FeatureFlagKey } from 'src/engine/core-modules/feature-flag/enums/feature-flag-key.enum';
 import { FeatureFlagService } from 'src/engine/core-modules/feature-flag/services/feature-flag.service';
 import { DataSourceService } from 'src/engine/metadata-modules/data-source/data-source.service';
 import {
@@ -33,7 +34,7 @@ import {
 import { RelationToDelete } from 'src/engine/metadata-modules/relation-metadata/types/relation-to-delete';
 import { RemoteTableRelationsService } from 'src/engine/metadata-modules/remote-server/remote-table/remote-table-relations/remote-table-relations.service';
 import { mapUdtNameToFieldType } from 'src/engine/metadata-modules/remote-server/remote-table/utils/udt-name-mapper.util';
-import { WorkspaceMetadataVersionService } from 'src/engine/metadata-modules/workspace-metadata-version/services/workspace-metadata-version.service';
+import { WorkspaceMetadataVersionService } from 'src/engine/metadata-modules/workspace-metadata-version/workspace-metadata-version.service';
 import { generateMigrationName } from 'src/engine/metadata-modules/workspace-migration/utils/generate-migration-name.util';
 import {
   WorkspaceMigrationColumnActionType,
@@ -214,6 +215,7 @@ export class ObjectMetadataService extends TypeOrmQueryService<ObjectMetadataEnt
       isCustom: isCustom,
       isSystem: false,
       isRemote: objectMetadataInput.isRemote,
+      isSoftDeletable: true,
       fields: isCustom
         ? // Creating default fields.
           // No need to create a custom migration for this though as the default columns are already
@@ -373,10 +375,18 @@ export class ObjectMetadataService extends TypeOrmQueryService<ObjectMetadataEnt
       );
     });
 
-    await this.createViewWorkspaceFavorite(
-      objectMetadataInput.workspaceId,
-      view[0].id,
-    );
+    const isViewWorkspaceFavoriteEnabled =
+      await this.featureFlagService.isFeatureEnabled(
+        FeatureFlagKey.IsWorkspaceFavoriteEnabled,
+        objectMetadataInput.workspaceId,
+      );
+
+    if (isViewWorkspaceFavoriteEnabled) {
+      await this.createViewWorkspaceFavorite(
+        objectMetadataInput.workspaceId,
+        view[0].id,
+      );
+    }
 
     await this.workspaceMetadataVersionService.incrementMetadataVersion(
       objectMetadataInput.workspaceId,

@@ -30,11 +30,11 @@ import { seedPeople } from 'src/database/typeorm-seeds/workspace/people';
 import { seedWorkspaceMember } from 'src/database/typeorm-seeds/workspace/workspace-members';
 import { rawDataSource } from 'src/database/typeorm/raw/raw.datasource';
 import { TypeORMService } from 'src/database/typeorm/typeorm.service';
-import { InjectCacheStorage } from 'src/engine/core-modules/cache-storage/decorators/cache-storage.decorator';
-import { CacheStorageService } from 'src/engine/core-modules/cache-storage/services/cache-storage.service';
-import { CacheStorageNamespace } from 'src/engine/core-modules/cache-storage/types/cache-storage-namespace.enum';
 import { FeatureFlagKey } from 'src/engine/core-modules/feature-flag/enums/feature-flag-key.enum';
-import { FeatureFlagService } from 'src/engine/core-modules/feature-flag/services/feature-flag.service';
+import { FeatureFlagEntity } from 'src/engine/core-modules/feature-flag/feature-flag.entity';
+import { CacheStorageService } from 'src/engine/core-modules/cache-storage/cache-storage.service';
+import { InjectCacheStorage } from 'src/engine/core-modules/cache-storage/decorators/cache-storage.decorator';
+import { CacheStorageNamespace } from 'src/engine/core-modules/cache-storage/types/cache-storage-namespace.enum';
 import { DataSourceService } from 'src/engine/metadata-modules/data-source/data-source.service';
 import { FieldMetadataService } from 'src/engine/metadata-modules/field-metadata/field-metadata.service';
 import { ObjectMetadataEntity } from 'src/engine/metadata-modules/object-metadata/object-metadata.entity';
@@ -63,7 +63,6 @@ export class DataSeedWorkspaceCommand extends CommandRunner {
     private readonly objectMetadataService: ObjectMetadataService,
     @InjectCacheStorage(CacheStorageNamespace.EngineWorkspace)
     private readonly workspaceSchemaCache: CacheStorageService,
-    private readonly featureFlagService: FeatureFlagService,
   ) {
     super();
   }
@@ -130,17 +129,10 @@ export class DataSeedWorkspaceCommand extends CommandRunner {
           return acc;
         }, {});
 
-        const isMessageThreadSubscriberEnabled =
-          await this.featureFlagService.isFeatureEnabled(
-            FeatureFlagKey.IsMessageThreadSubscriberEnabled,
-            workspaceId,
-          );
+        const featureFlagRepository =
+          workspaceDataSource.getRepository<FeatureFlagEntity>('featureFlag');
 
-        const isWorkflowEnabled =
-          await this.featureFlagService.isFeatureEnabled(
-            FeatureFlagKey.IsWorkflowEnabled,
-            workspaceId,
-          );
+        const featureFlags = await featureFlagRepository.find({});
 
         await this.seedCompanyCustomFields(
           objectMetadataMap[STANDARD_OBJECT_IDS.company],
@@ -167,6 +159,13 @@ export class DataSeedWorkspaceCommand extends CommandRunner {
               await seedConnectedAccount(
                 entityManager,
                 dataSourceMetadata.schema,
+              );
+
+              const isMessageThreadSubscriberEnabled = featureFlags.some(
+                (featureFlag) =>
+                  featureFlag.key ===
+                    FeatureFlagKey.IsMessageThreadSubscriberEnabled &&
+                  featureFlag.value === true,
               );
 
               if (isMessageThreadSubscriberEnabled) {
@@ -212,13 +211,11 @@ export class DataSeedWorkspaceCommand extends CommandRunner {
               entityManager,
               dataSourceMetadata.schema,
               objectMetadataMap,
-              isWorkflowEnabled,
+              featureFlags,
             );
 
             await seedWorkspaceFavorites(
-              viewDefinitionsWithId
-                .filter((view) => view.key === 'INDEX')
-                .map((view) => view.id),
+              viewDefinitionsWithId.map((view) => view.id),
               entityManager,
               dataSourceMetadata.schema,
             );

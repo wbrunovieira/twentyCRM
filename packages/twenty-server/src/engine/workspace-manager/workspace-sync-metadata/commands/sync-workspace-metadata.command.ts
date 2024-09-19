@@ -1,12 +1,11 @@
-import { InjectRepository } from '@nestjs/typeorm';
+import { Logger } from '@nestjs/common';
 
-import { Command, Option } from 'nest-commander';
-import { Repository } from 'typeorm';
+import isEmpty from 'lodash.isempty';
+import { Command, CommandRunner, Option } from 'nest-commander';
 
-import { ActiveWorkspacesCommandRunner } from 'src/database/commands/active-workspaces.command';
-import { Workspace } from 'src/engine/core-modules/workspace/workspace.entity';
 import { DataSourceService } from 'src/engine/metadata-modules/data-source/data-source.service';
 import { WorkspaceHealthService } from 'src/engine/workspace-manager/workspace-health/workspace-health.service';
+import { WorkspaceStatusService } from 'src/engine/workspace-manager/workspace-status/services/workspace-status.service';
 import { WorkspaceSyncMetadataService } from 'src/engine/workspace-manager/workspace-sync-metadata/workspace-sync-metadata.service';
 
 import { SyncWorkspaceLoggerService } from './services/sync-workspace-logger.service';
@@ -22,24 +21,35 @@ interface RunWorkspaceMigrationsOptions {
   name: 'workspace:sync-metadata',
   description: 'Sync metadata',
 })
-export class SyncWorkspaceMetadataCommand extends ActiveWorkspacesCommandRunner {
+export class SyncWorkspaceMetadataCommand extends CommandRunner {
+  private readonly logger = new Logger(SyncWorkspaceMetadataCommand.name);
+
   constructor(
-    @InjectRepository(Workspace, 'core')
-    protected readonly workspaceRepository: Repository<Workspace>,
     private readonly workspaceSyncMetadataService: WorkspaceSyncMetadataService,
     private readonly workspaceHealthService: WorkspaceHealthService,
     private readonly dataSourceService: DataSourceService,
     private readonly syncWorkspaceLoggerService: SyncWorkspaceLoggerService,
+    private readonly workspaceStatusService: WorkspaceStatusService,
   ) {
-    super(workspaceRepository);
+    super();
   }
 
-  async executeActiveWorkspacesCommand(
+  async run(
     _passedParam: string[],
     options: RunWorkspaceMigrationsOptions,
-    workspaceIds: string[],
   ): Promise<void> {
-    this.logger.log(`Attempting to sync ${workspaceIds.length} workspaces.`);
+    // TODO: re-implement load index from workspaceService, this is breaking the logger
+    let workspaceIds = options.workspaceId ? [options.workspaceId] : [];
+
+    if (isEmpty(workspaceIds)) {
+      const activeWorkspaceIds =
+        await this.workspaceStatusService.getActiveWorkspaceIds();
+
+      workspaceIds = activeWorkspaceIds;
+      this.logger.log(
+        `Attempting to sync ${activeWorkspaceIds.length} workspaces.`,
+      );
+    }
 
     let count = 1;
 
@@ -126,6 +136,15 @@ export class SyncWorkspaceMetadataCommand extends ActiveWorkspacesCommandRunner 
           : ''
       }`,
     );
+  }
+
+  @Option({
+    flags: '-w, --workspace-id [workspace_id]',
+    description: 'workspace id',
+    required: false,
+  })
+  parseWorkspaceId(value: string): string {
+    return value;
   }
 
   @Option({

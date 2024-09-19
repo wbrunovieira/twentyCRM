@@ -60,4 +60,9 @@ export interface WorkspaceEntityMetadataArgs {
    * Image identifier.
    */
   readonly imageIdentifierStandardId: string | null;
+
+  /**
+   * Enable soft delete.
+   */
+  readonly softDelete?: boolean;
 }

@@ -21,7 +21,6 @@ type MultiItemFieldMenuItemProps<T> = {
   onSetAsPrimary?: () => void;
   onDelete?: () => void;
   DisplayComponent: React.ComponentType<{ value: T }>;
-  hasPrimaryButton?: boolean;
 };
 
 const StyledIconBookmark = styled(IconBookmark)`
@@ -38,7 +37,6 @@ export const MultiItemFieldMenuItem = <T,>({
   onSetAsPrimary,
   onDelete,
   DisplayComponent,
-  hasPrimaryButton = true,
 }: MultiItemFieldMenuItemProps<T>) => {
   const [isHovered, setIsHovered] = useState(false);
   const { isDropdownOpen, closeDropdown } = useDropdown(dropdownId);
@@ -76,7 +74,7 @@ export const MultiItemFieldMenuItem = <T,>({
                   clickableComponent={iconButton}
                   dropdownComponents={
                     <DropdownMenuItemsContainer>
-                      {hasPrimaryButton && !isPrimary && (
+                      {!isPrimary && (
                         <MenuItem
                           LeftIcon={IconBookmarkPlus}
                           text="Set as Primary"

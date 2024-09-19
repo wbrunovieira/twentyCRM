@@ -50,8 +50,6 @@ FROM node:18.17.1-alpine as twenty
 # Used to run healthcheck in docker
 RUN apk add --no-cache curl jq
 
-RUN npm install -g tsx
-
 COPY ./packages/twenty-docker/twenty/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 

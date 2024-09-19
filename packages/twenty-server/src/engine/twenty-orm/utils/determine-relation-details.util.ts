@@ -1,9 +1,8 @@
 import { RelationType } from 'typeorm/metadata/types/RelationTypes';
 
-import { FieldMetadataInterface } from 'src/engine/metadata-modules/field-metadata/interfaces/field-metadata.interface';
-
+import { FieldMetadataEntity } from 'src/engine/metadata-modules/field-metadata/field-metadata.entity';
+import { ObjectMetadataEntity } from 'src/engine/metadata-modules/object-metadata/object-metadata.entity';
 import { RelationMetadataEntity } from 'src/engine/metadata-modules/relation-metadata/relation-metadata.entity';
-import { ObjectMetadataMap } from 'src/engine/metadata-modules/utils/generate-object-metadata-map.util';
 import { computeRelationType } from 'src/engine/twenty-orm/utils/compute-relation-type.util';
 
 interface RelationDetails {
@@ -14,28 +13,37 @@ interface RelationDetails {
 }
 
 export async function determineRelationDetails(
-  fieldMetadata: FieldMetadataInterface,
+  fieldMetadata: FieldMetadataEntity,
   relationMetadata: RelationMetadataEntity,
-  objectMetadataMap: ObjectMetadataMap,
+  objectMetadataCollection: ObjectMetadataEntity[],
 ): Promise<RelationDetails> {
   const relationType = computeRelationType(fieldMetadata, relationMetadata);
-  const fromObjectMetadata = objectMetadataMap[fieldMetadata.objectMetadataId];
-  let toObjectMetadata = objectMetadataMap[relationMetadata.toObjectMetadataId];
+  let fromObjectMetadata: ObjectMetadataEntity | undefined =
+    fieldMetadata.object;
+  let toObjectMetadata: ObjectMetadataEntity | undefined =
+    objectMetadataCollection.find(
+      (objectMetadata) =>
+        objectMetadata.id === relationMetadata.toObjectMetadataId,
+    );
 
   // RelationMetadata always store the relation from the perspective of the `from` object, MANY_TO_ONE relations are not stored yet
   if (relationType === 'many-to-one') {
-    toObjectMetadata = objectMetadataMap[relationMetadata.fromObjectMetadataId];
+    fromObjectMetadata = fieldMetadata.object;
+
+    toObjectMetadata = objectMetadataCollection.find(
+      (objectMetadata) =>
+        objectMetadata.id === relationMetadata.fromObjectMetadataId,
+    );
   }
 
   if (!fromObjectMetadata || !toObjectMetadata) {
     throw new Error('Object metadata not found');
   }
 
-  const toFieldMetadata = Object.values(toObjectMetadata.fields).find(
-    (field) =>
-      relationType === 'many-to-one'
-        ? field.id === relationMetadata.fromFieldMetadataId
-        : field.id === relationMetadata.toFieldMetadataId,
+  const toFieldMetadata = toObjectMetadata.fields.find((field) =>
+    relationType === 'many-to-one'
+      ? field.id === relationMetadata.fromFieldMetadataId
+      : field.id === relationMetadata.toFieldMetadataId,
   );
 
   if (!toFieldMetadata) {

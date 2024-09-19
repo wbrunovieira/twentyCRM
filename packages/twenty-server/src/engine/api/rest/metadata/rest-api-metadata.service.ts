@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 
 import { Request } from 'express';
 
-import { MetadataQueryBuilderFactory } from 'src/engine/api/rest/metadata/query-builder/metadata-query-builder.factory';
+import { TokenService } from 'src/engine/core-modules/auth/services/token.service';
 import {
   GraphqlApiType,
   RestApiService,
 } from 'src/engine/api/rest/rest-api.service';
-import { TokenService } from 'src/engine/core-modules/auth/token/services/token.service';
+import { MetadataQueryBuilderFactory } from 'src/engine/api/rest/metadata/query-builder/metadata-query-builder.factory';
 
 @Injectable()
 export class RestApiMetadataService {

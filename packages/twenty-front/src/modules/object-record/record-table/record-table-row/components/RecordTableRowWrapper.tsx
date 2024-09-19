@@ -5,7 +5,7 @@ import { useInView } from 'react-intersection-observer';
 import { useRecoilValue } from 'recoil';
 
 import { getBasePathToShowPage } from '@/object-metadata/utils/getBasePathToShowPage';
-import { RecordIndexRootPropsContext } from '@/object-record/record-index/contexts/RecordIndexRootPropsContext';
+import { RecordIndexEventContext } from '@/object-record/record-index/contexts/RecordIndexEventContext';
 import { RecordTableContext } from '@/object-record/record-table/contexts/RecordTableContext';
 import { RecordTableRowContext } from '@/object-record/record-table/contexts/RecordTableRowContext';
 import { useRecordTableStates } from '@/object-record/record-table/hooks/internal/useRecordTableStates';
@@ -24,7 +24,7 @@ export const RecordTableRowWrapper = ({
   children: ReactNode;
 }) => {
   const { objectMetadataItem } = useContext(RecordTableContext);
-  const { onIndexRecordsLoaded } = useContext(RecordIndexRootPropsContext);
+  const { onIndexRecordsLoaded } = useContext(RecordIndexEventContext);
 
   const theme = useTheme();
 

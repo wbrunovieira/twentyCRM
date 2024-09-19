@@ -13,6 +13,7 @@ import { AppPath } from '@/types/AppPath';
 import { SettingsPath } from '@/types/SettingsPath';
 import { SubMenuTopBarContainer } from '@/ui/layout/page/SubMenuTopBarContainer';
 import { Section } from '@/ui/layout/section/components/Section';
+import { Breadcrumb } from '@/ui/navigation/bread-crumb/components/Breadcrumb';
 
 export const SettingsIntegrationDatabase = () => {
   const { databaseKey = '' } = useParams();
@@ -43,18 +44,17 @@ export const SettingsIntegrationDatabase = () => {
   return (
     <SubMenuTopBarContainer
       Icon={IconSettings}
-      title={integration.text}
-      links={[
-        {
-          children: 'Workspace',
-          href: getSettingsPagePath(SettingsPath.Workspace),
-        },
-        {
-          children: 'Integrations',
-          href: getSettingsPagePath(SettingsPath.Integrations),
-        },
-        { children: integration.text },
-      ]}
+      title={
+        <Breadcrumb
+          links={[
+            {
+              children: 'Integrations',
+              href: getSettingsPagePath(SettingsPath.Integrations),
+            },
+            { children: integration.text },
+          ]}
+        />
+      }
     >
       <SettingsPageContainer>
         <SettingsIntegrationPreview

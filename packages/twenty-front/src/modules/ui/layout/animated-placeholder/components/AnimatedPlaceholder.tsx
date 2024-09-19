@@ -1,7 +1,7 @@
+import { useEffect } from 'react';
 import { useTheme } from '@emotion/react';
 import styled from '@emotion/styled';
 import { animate, motion, useMotionValue, useTransform } from 'framer-motion';
-import { useEffect } from 'react';
 
 import { BACKGROUND } from '@/ui/layout/animated-placeholder/constants/Background';
 import { DARK_BACKGROUND } from '@/ui/layout/animated-placeholder/constants/DarkBackground';
@@ -35,12 +35,8 @@ const StyledMovingImage = styled(motion.img)<StyledImageProps>`
   z-index: 2;
 `;
 
-export type AnimatedPlaceholderType =
-  | keyof typeof BACKGROUND
-  | keyof typeof MOVING_IMAGE;
-
 interface AnimatedPlaceholderProps {
-  type: AnimatedPlaceholderType;
+  type: keyof typeof BACKGROUND | keyof typeof MOVING_IMAGE;
 }
 
 const AnimatedPlaceholder = ({ type }: AnimatedPlaceholderProps) => {

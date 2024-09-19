@@ -66,7 +66,6 @@ export const EventCardMessage = ({
     objectNameSingular: CoreObjectNameSingular.Message,
     objectRecordId: messageId,
     recordGqlFields: {
-      id: true,
       text: true,
       subject: true,
       direction: true,

@@ -32,10 +32,6 @@ export const validateFieldNameAvailabilityOrThrow = (
   const reservedCompositeFieldsNames =
     getReservedCompositeFieldNames(objectMetadata);
 
-  if (objectMetadata.fields.some((field) => field.name === name)) {
-    throw new NameNotAvailableException(name);
-  }
-
   if (reservedCompositeFieldsNames.includes(name)) {
     throw new NameNotAvailableException(name);
   }

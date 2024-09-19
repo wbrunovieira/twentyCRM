@@ -6,10 +6,10 @@ import { Repository } from 'typeorm';
 import { BillingSubscription } from 'src/engine/core-modules/billing/entities/billing-subscription.entity';
 import { BillingSubscriptionService } from 'src/engine/core-modules/billing/services/billing-subscription.service';
 import { StripeService } from 'src/engine/core-modules/billing/stripe/stripe.service';
-import { EnvironmentService } from 'src/engine/core-modules/environment/environment.service';
-import { UserWorkspace } from 'src/engine/core-modules/user-workspace/user-workspace.entity';
+import { UserWorkspaceService } from 'src/engine/core-modules/user-workspace/user-workspace.service';
 import { User } from 'src/engine/core-modules/user/user.entity';
 import { Workspace } from 'src/engine/core-modules/workspace/workspace.entity';
+import { EnvironmentService } from 'src/engine/core-modules/environment/environment.service';
 import { assert } from 'src/utils/assert';
 
 export enum WebhookEvent {
@@ -24,11 +24,10 @@ export class BillingPortalWorkspaceService {
   protected readonly logger = new Logger(BillingPortalWorkspaceService.name);
   constructor(
     private readonly stripeService: StripeService,
+    private readonly userWorkspaceService: UserWorkspaceService,
     private readonly environmentService: EnvironmentService,
     @InjectRepository(BillingSubscription, 'core')
     private readonly billingSubscriptionRepository: Repository<BillingSubscription>,
-    @InjectRepository(UserWorkspace, 'core')
-    private readonly userWorkspaceRepository: Repository<UserWorkspace>,
     private readonly billingSubscriptionService: BillingSubscriptionService,
   ) {}
 
@@ -43,9 +42,8 @@ export class BillingPortalWorkspaceService {
       ? frontBaseUrl + successUrlPath
       : frontBaseUrl;
 
-    const quantity = await this.userWorkspaceRepository.countBy({
-      workspaceId: workspace.id,
-    });
+    const quantity =
+      (await this.userWorkspaceService.getUserCount(workspace.id)) || 1;
 
     const stripeCustomerId = (
       await this.billingSubscriptionRepository.findOneBy({

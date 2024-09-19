@@ -85,7 +85,7 @@ export const MultiWorkspaceDropdownButton = ({
         scope: NavigationDrawerHotKeyScope.MultiWorkspaceDropdownButton,
       }}
       clickableComponent={
-        <StyledContainer data-testid="workspace-dropdown">
+        <StyledContainer>
           <StyledLogo
             logo={
               getImageAbsoluteURI(

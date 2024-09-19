@@ -4,13 +4,18 @@ import {
 } from 'src/modules/workflow/common/standard-objects/workflow-version.workspace-entity';
 import { WorkflowWorkspaceEntity } from 'src/modules/workflow/common/standard-objects/workflow.workspace-entity';
 import {
+  WorkflowTrigger,
+  WorkflowTriggerType,
+} from 'src/modules/workflow/workflow-trigger/types/workflow-trigger.type';
+import {
   WorkflowTriggerException,
   WorkflowTriggerExceptionCode,
 } from 'src/modules/workflow/workflow-trigger/exceptions/workflow-trigger.exception';
-import { WorkflowTriggerType } from 'src/modules/workflow/workflow-trigger/types/workflow-trigger.type';
 
 export function assertVersionCanBeActivated(
-  workflowVersion: WorkflowVersionWorkspaceEntity,
+  workflowVersion: Omit<WorkflowVersionWorkspaceEntity, 'trigger'> & {
+    trigger: WorkflowTrigger;
+  },
   workflow: WorkflowWorkspaceEntity,
 ) {
   assertVersionIsValid(workflowVersion);
@@ -32,7 +37,11 @@ export function assertVersionCanBeActivated(
   }
 }
 
-function assertVersionIsValid(workflowVersion: WorkflowVersionWorkspaceEntity) {
+function assertVersionIsValid(
+  workflowVersion: Omit<WorkflowVersionWorkspaceEntity, 'trigger'> & {
+    trigger: WorkflowTrigger;
+  },
+) {
   if (!workflowVersion.trigger) {
     throw new WorkflowTriggerException(
       'Workflow version does not contain trigger',

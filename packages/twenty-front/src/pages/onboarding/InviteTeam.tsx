@@ -27,9 +27,11 @@ import { MainButton } from '@/ui/input/button/components/MainButton';
 import { TextInputV2 } from '@/ui/input/components/TextInputV2';
 import { AnimatedTranslation } from '@/ui/utilities/animation/components/AnimatedTranslation';
 import { useScopedHotkeys } from '@/ui/utilities/hotkey/hooks/useScopedHotkeys';
-import { OnboardingStatus } from '~/generated/graphql';
+import {
+  OnboardingStatus,
+  useSendInviteLinkMutation,
+} from '~/generated/graphql';
 import { isDefined } from '~/utils/isDefined';
-import { useCreateWorkspaceInvitation } from '../../modules/workspace-invitation/hooks/useCreateWorkspaceInvitation';
 
 const StyledAnimatedContainer = styled.div`
   display: flex;
@@ -63,8 +65,7 @@ type FormInput = z.infer<typeof validationSchema>;
 export const InviteTeam = () => {
   const theme = useTheme();
   const { enqueueSnackBar } = useSnackBar();
-  const { sendInvitation } = useCreateWorkspaceInvitation();
-
+  const [sendInviteLink] = useSendInviteLinkMutation();
   const setNextOnboardingStatus = useSetNextOnboardingStatus();
   const currentUser = useRecoilValue(currentUserState);
   const currentWorkspace = useRecoilValue(currentWorkspaceState);
@@ -133,7 +134,7 @@ export const InviteTeam = () => {
             .filter((email) => email.length > 0),
         ),
       );
-      const result = await sendInvitation({ emails });
+      const result = await sendInviteLink({ variables: { emails } });
 
       setNextOnboardingStatus();
 
@@ -147,7 +148,7 @@ export const InviteTeam = () => {
         });
       }
     },
-    [enqueueSnackBar, sendInvitation, setNextOnboardingStatus],
+    [enqueueSnackBar, sendInviteLink, setNextOnboardingStatus],
   );
 
   useScopedHotkeys(

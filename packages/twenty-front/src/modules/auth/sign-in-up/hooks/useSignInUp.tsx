@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { SubmitHandler, UseFormReturn } from 'react-hook-form';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { Form } from '@/auth/sign-in-up/hooks/useSignInUpForm';
 import { useReadCaptchaToken } from '@/captcha/hooks/useReadCaptchaToken';
@@ -29,9 +29,6 @@ export const useSignInUp = (form: UseFormReturn<Form>) => {
   const isMatchingLocation = useIsMatchingLocation();
 
   const workspaceInviteHash = useParams().workspaceInviteHash;
-  const [searchParams] = useSearchParams();
-  const workspacePersonalInviteToken =
-    searchParams.get('inviteToken') ?? undefined;
 
   const [isInviteMode] = useState(() => isMatchingLocation(AppPath.Invite));
 
@@ -115,7 +112,6 @@ export const useSignInUp = (form: UseFormReturn<Form>) => {
               data.email.toLowerCase().trim(),
               data.password,
               workspaceInviteHash,
-              workspacePersonalInviteToken,
               token,
             );
       } catch (err: any) {
@@ -132,7 +128,6 @@ export const useSignInUp = (form: UseFormReturn<Form>) => {
       signInWithCredentials,
       signUpWithCredentials,
       workspaceInviteHash,
-      workspacePersonalInviteToken,
       enqueueSnackBar,
       requestFreshCaptchaToken,
     ],

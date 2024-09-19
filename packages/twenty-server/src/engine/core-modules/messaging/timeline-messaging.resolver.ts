@@ -9,11 +9,8 @@ import { TimelineThreadsWithTotal } from 'src/engine/core-modules/messaging/dtos
 import { GetMessagesService } from 'src/engine/core-modules/messaging/services/get-messages.service';
 import { UserService } from 'src/engine/core-modules/user/services/user.service';
 import { User } from 'src/engine/core-modules/user/user.entity';
-import { Workspace } from 'src/engine/core-modules/workspace/workspace.entity';
 import { AuthUser } from 'src/engine/decorators/auth/auth-user.decorator';
-import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
-import { UserAuthGuard } from 'src/engine/guards/user-auth.guard';
-import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
+import { JwtAuthGuard } from 'src/engine/guards/jwt.auth.guard';
 
 @ArgsType()
 class GetTimelineThreadsFromPersonIdArgs {
@@ -41,7 +38,7 @@ class GetTimelineThreadsFromCompanyIdArgs {
   pageSize: number;
 }
 
-@UseGuards(WorkspaceAuthGuard, UserAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Resolver(() => TimelineThreadsWithTotal)
 export class TimelineMessagingResolver {
   constructor(
@@ -52,13 +49,9 @@ export class TimelineMessagingResolver {
   @Query(() => TimelineThreadsWithTotal)
   async getTimelineThreadsFromPersonId(
     @AuthUser() user: User,
-    @AuthWorkspace() workspace: Workspace,
     @Args() { personId, page, pageSize }: GetTimelineThreadsFromPersonIdArgs,
   ) {
-    const workspaceMember = await this.userService.loadWorkspaceMember(
-      user,
-      workspace,
-    );
+    const workspaceMember = await this.userService.loadWorkspaceMember(user);
 
     if (!workspaceMember) {
       return;
@@ -78,13 +71,9 @@ export class TimelineMessagingResolver {
   @Query(() => TimelineThreadsWithTotal)
   async getTimelineThreadsFromCompanyId(
     @AuthUser() user: User,
-    @AuthWorkspace() workspace: Workspace,
     @Args() { companyId, page, pageSize }: GetTimelineThreadsFromCompanyIdArgs,
   ) {
-    const workspaceMember = await this.userService.loadWorkspaceMember(
-      user,
-      workspace,
-    );
+    const workspaceMember = await this.userService.loadWorkspaceMember(user);
 
     if (!workspaceMember) {
       return;

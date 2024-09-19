@@ -1,5 +1,5 @@
-import styled from '@emotion/styled';
 import { Controller, useFormContext } from 'react-hook-form';
+import styled from '@emotion/styled';
 import { useIcons } from 'twenty-ui';
 import { z } from 'zod';
 
@@ -14,7 +14,6 @@ import { RelationType } from '@/settings/data-model/types/RelationType';
 import { IconPicker } from '@/ui/input/components/IconPicker';
 import { Select } from '@/ui/input/components/Select';
 import { TextInput } from '@/ui/input/components/TextInput';
-import { RelationDefinitionType } from '~/generated-metadata/graphql';
 
 export const settingsDataModelFieldRelationFormSchema = z.object({
   relation: z.object({
@@ -24,10 +23,7 @@ export const settingsDataModelFieldRelationFormSchema = z.object({
     }),
     objectMetadataId: z.string().uuid(),
     type: z.enum(
-      Object.keys(RELATION_TYPES) as [
-        RelationDefinitionType,
-        ...RelationDefinitionType[],
-      ],
+      Object.keys(RELATION_TYPES) as [RelationType, ...RelationType[]],
     ),
   }),
 });
@@ -37,7 +33,10 @@ export type SettingsDataModelFieldRelationFormValues = z.infer<
 >;
 
 type SettingsDataModelFieldRelationFormProps = {
-  fieldMetadataItem: Pick<FieldMetadataItem, 'type'>;
+  fieldMetadataItem: Pick<
+    FieldMetadataItem,
+    'fromRelationMetadata' | 'toRelationMetadata' | 'type'
+  >;
 };
 
 const StyledContainer = styled.div`

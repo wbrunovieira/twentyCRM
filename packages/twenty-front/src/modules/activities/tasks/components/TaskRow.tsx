@@ -18,13 +18,13 @@ const StyledContainer = styled.div`
   justify-content: space-between;
   border-bottom: 1px solid ${({ theme }) => theme.border.color.light};
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   height: ${({ theme }) => theme.spacing(12)};
   min-width: calc(100% - ${({ theme }) => theme.spacing(8)});
   max-width: calc(100% - ${({ theme }) => theme.spacing(8)});
   padding: 0 ${({ theme }) => theme.spacing(4)};
   overflow: hidden;
-  max-inline-size: 60px;
+
   &:last-child {
     border-bottom: 0;
   }
@@ -33,9 +33,10 @@ const StyledContainer = styled.div`
 const StyledTaskBody = styled.div`
   color: ${({ theme }) => theme.font.color.tertiary};
   display: flex;
-  max-width: calc(80% - ${({ theme }) => theme.spacing(2)});
-  text-overflow: ellipsis;
+  max-width: 100%;
+  flex: 1;
   overflow: hidden;
+
   padding-bottom: ${({ theme }) => theme.spacing(0.25)};
 `;
 
@@ -62,14 +63,12 @@ const StyledDueDate = styled.div<{
     isPast ? theme.font.color.danger : theme.font.color.secondary};
   display: flex;
   gap: ${({ theme }) => theme.spacing(1)};
-  padding-left: ${({ theme }) => theme.spacing(1)};
+  padding-left: ${({ theme }) => theme.spacing(2)};
   white-space: nowrap;
 `;
 
 const StyledRightSideContainer = styled.div`
-  align-items: center;
-  display: inline-flex;
-  max-width: 50%;
+  display: flex;
 `;
 
 const StyledPlaceholder = styled.div`
@@ -78,9 +77,9 @@ const StyledPlaceholder = styled.div`
 
 const StyledLeftSideContainer = styled.div`
   align-items: center;
-  display: inline-flex;
   display: flex;
   flex: 1;
+
   overflow: hidden;
 `;
 

@@ -24,10 +24,3 @@ export type WorkspaceMember = {
   dateFormat?: WorkspaceMemberDateFormatEnum | null;
   timeFormat?: WorkspaceMemberTimeFormatEnum | null;
 };
-
-export type WorkspaceInvitation = {
-  __typename: 'WorkspaceInvitation';
-  id: string;
-  email: string;
-  expiresAt: string;
-};

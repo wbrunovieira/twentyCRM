@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-import { FeatureFlagKey } from 'src/engine/core-modules/feature-flag/enums/feature-flag-key.enum';
-import { FeatureFlagService } from 'src/engine/core-modules/feature-flag/services/feature-flag.service';
 import { DataSourceEntity } from 'src/engine/metadata-modules/data-source/data-source.entity';
 import { DataSourceService } from 'src/engine/metadata-modules/data-source/data-source.service';
 import { ObjectMetadataService } from 'src/engine/metadata-modules/object-metadata/object-metadata.service';
@@ -19,7 +17,6 @@ export class WorkspaceManagerService {
     private readonly objectMetadataService: ObjectMetadataService,
     private readonly dataSourceService: DataSourceService,
     private readonly workspaceSyncMetadataService: WorkspaceSyncMetadataService,
-    private readonly featureFlagService: FeatureFlagService,
   ) {}
 
   /**
@@ -120,16 +117,10 @@ export class WorkspaceManagerService {
     const createdObjectMetadata =
       await this.objectMetadataService.findManyWithinWorkspace(workspaceId);
 
-    const isWorkflowEnabled = await this.featureFlagService.isFeatureEnabled(
-      FeatureFlagKey.IsWorkflowEnabled,
-      workspaceId,
-    );
-
     await standardObjectsPrefillData(
       workspaceDataSource,
       dataSourceMetadata.schema,
       createdObjectMetadata,
-      isWorkflowEnabled,
     );
   }
 
@@ -156,16 +147,10 @@ export class WorkspaceManagerService {
     const createdObjectMetadata =
       await this.objectMetadataService.findManyWithinWorkspace(workspaceId);
 
-    const isWorkflowEnabled = await this.featureFlagService.isFeatureEnabled(
-      FeatureFlagKey.IsWorkflowEnabled,
-      workspaceId,
-    );
-
     await demoObjectsPrefillData(
       workspaceDataSource,
       dataSourceMetadata.schema,
       createdObjectMetadata,
-      isWorkflowEnabled,
     );
   }
 

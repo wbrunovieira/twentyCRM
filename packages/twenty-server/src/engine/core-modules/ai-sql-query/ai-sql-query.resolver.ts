@@ -12,8 +12,7 @@ import { User } from 'src/engine/core-modules/user/user.entity';
 import { Workspace } from 'src/engine/core-modules/workspace/workspace.entity';
 import { AuthUser } from 'src/engine/decorators/auth/auth-user.decorator';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
-import { UserAuthGuard } from 'src/engine/guards/user-auth.guard';
-import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
+import { JwtAuthGuard } from 'src/engine/guards/jwt.auth.guard';
 
 @ArgsType()
 class GetAISQLQueryArgs {
@@ -21,7 +20,7 @@ class GetAISQLQueryArgs {
   text: string;
 }
 
-@UseGuards(WorkspaceAuthGuard, UserAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Resolver(() => AISQLQueryResult)
 export class AISQLQueryResolver {
   constructor(

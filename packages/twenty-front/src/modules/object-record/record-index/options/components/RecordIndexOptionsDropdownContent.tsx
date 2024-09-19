@@ -90,11 +90,10 @@ export const RecordIndexOptionsDropdownContent = ({
     hiddenTableColumns,
   } = useRecordIndexOptionsForTable(recordIndexId);
 
-  const { handleToggleTrashColumnFilter, toggleSoftDeleteFilterState } =
-    useHandleToggleTrashColumnFilter({
-      objectNameSingular,
-      viewBarId: recordIndexId,
-    });
+  const handleToggleTrashColumnFilter = useHandleToggleTrashColumnFilter({
+    objectNameSingular,
+    viewBarId: recordIndexId,
+  });
 
   const {
     visibleBoardFields,
@@ -164,7 +163,6 @@ export const RecordIndexOptionsDropdownContent = ({
           <MenuItem
             onClick={() => {
               handleToggleTrashColumnFilter();
-              toggleSoftDeleteFilterState(true);
               closeDropdown();
             }}
             LeftIcon={IconRotate2}

@@ -1,6 +1,6 @@
-import { ObjectMetadataMap } from 'src/engine/metadata-modules/utils/generate-object-metadata-map.util';
+import { ObjectMetadataEntity } from 'src/engine/metadata-modules/object-metadata/object-metadata.entity';
 
 export interface WorkspaceInternalContext {
   workspaceId: string;
-  objectMetadataMap: ObjectMetadataMap;
+  objectMetadataCollection: ObjectMetadataEntity[];
 }

@@ -22,7 +22,6 @@ export {
   IconBookmark,
   IconBookmarkPlus,
   IconBox,
-  IconBracketsContain,
   IconBrandGithub,
   IconBrandGoogle,
   IconBrandLinkedin,

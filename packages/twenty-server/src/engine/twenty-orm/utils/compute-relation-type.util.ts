@@ -1,16 +1,15 @@
-import { FieldMetadataInterface } from 'src/engine/metadata-modules/field-metadata/interfaces/field-metadata.interface';
-
+import { FieldMetadataEntity } from 'src/engine/metadata-modules/field-metadata/field-metadata.entity';
 import {
   RelationMetadataEntity,
   RelationMetadataType,
 } from 'src/engine/metadata-modules/relation-metadata/relation-metadata.entity';
 import {
-  RelationDirection,
   deduceRelationDirection,
+  RelationDirection,
 } from 'src/engine/utils/deduce-relation-direction.util';
 
 export const computeRelationType = (
-  fieldMetadata: FieldMetadataInterface,
+  fieldMetadata: FieldMetadataEntity,
   relationMetadata: RelationMetadataEntity,
 ) => {
   const relationDirection = deduceRelationDirection(

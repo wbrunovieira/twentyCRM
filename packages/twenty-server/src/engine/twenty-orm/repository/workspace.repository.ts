@@ -27,8 +27,7 @@ import { WorkspaceInternalContext } from 'src/engine/twenty-orm/interfaces/works
 import { compositeTypeDefinitions } from 'src/engine/metadata-modules/field-metadata/composite-types';
 import { computeCompositeColumnName } from 'src/engine/metadata-modules/field-metadata/utils/compute-column-name.util';
 import { isCompositeFieldMetadataType } from 'src/engine/metadata-modules/field-metadata/utils/is-composite-field-metadata-type.util';
-import { RelationMetadataEntity } from 'src/engine/metadata-modules/relation-metadata/relation-metadata.entity';
-import { ObjectMetadataMapItem } from 'src/engine/metadata-modules/utils/generate-object-metadata-map.util';
+import { ObjectMetadataEntity } from 'src/engine/metadata-modules/object-metadata/object-metadata.entity';
 import { WorkspaceEntitiesStorage } from 'src/engine/twenty-orm/storage/workspace-entities.storage';
 import { computeRelationType } from 'src/engine/twenty-orm/utils/compute-relation-type.util';
 import { isRelationFieldMetadataType } from 'src/engine/utils/is-relation-field-metadata-type.util';
@@ -428,13 +427,9 @@ export class WorkspaceRepository<
 
     const formatedEntity = await this.formatData(entity);
     const result = await manager.insert(this.target, formatedEntity);
-    const formattedResult = await this.formatResult(result.generatedMaps);
+    const formattedResult = await this.formatResult(result);
 
-    return {
-      raw: result.raw,
-      generatedMaps: formattedResult,
-      identifiers: result.identifiers,
-    };
+    return formattedResult;
   }
 
   /**
@@ -474,19 +469,11 @@ export class WorkspaceRepository<
 
     const formattedEntityOrEntities = await this.formatData(entityOrEntities);
 
-    const result = await manager.upsert(
+    return manager.upsert(
       this.target,
       formattedEntityOrEntities,
       conflictPathsOrOptions,
     );
-
-    const formattedResult = await this.formatResult(result.generatedMaps);
-
-    return {
-      raw: result.raw,
-      generatedMaps: formattedResult,
-      identifiers: result.identifiers,
-    };
   }
 
   /**
@@ -636,14 +623,15 @@ export class WorkspaceRepository<
       throw new Error('Object metadata name is missing');
     }
 
-    const objectMetadata =
-      this.internalContext.objectMetadataMap[objectMetadataName];
+    const objectMetadata = this.internalContext.objectMetadataCollection.find(
+      (objectMetadata) => objectMetadata.nameSingular === objectMetadataName,
+    );
 
     if (!objectMetadata) {
       throw new Error(
         `Object metadata for object "${objectMetadataName}" is missing ` +
           `in workspace "${this.internalContext.workspaceId}" ` +
-          `with object metadata collection length: ${this.internalContext.objectMetadataMap.length}`,
+          `with object metadata collection length: ${this.internalContext.objectMetadataCollection.length}`,
       );
     }
 
@@ -651,12 +639,10 @@ export class WorkspaceRepository<
   }
 
   private async getCompositeFieldMetadataCollection(
-    objectMetadata: ObjectMetadataMapItem,
+    objectMetadata: ObjectMetadataEntity,
   ) {
-    const compositeFieldMetadataCollection = Object.values(
-      objectMetadata.fields,
-    ).filter((fieldMetadata) =>
-      isCompositeFieldMetadataType(fieldMetadata.type),
+    const compositeFieldMetadataCollection = objectMetadata.fields.filter(
+      (fieldMetadata) => isCompositeFieldMetadataType(fieldMetadata.type),
     );
 
     return compositeFieldMetadataCollection;
@@ -737,7 +723,7 @@ export class WorkspaceRepository<
 
   private async formatResult<T>(
     data: T,
-    objectMetadata?: ObjectMetadataMapItem,
+    objectMetadata?: ObjectMetadataEntity,
   ): Promise<T> {
     objectMetadata ??= await this.getObjectMetadataFromTarget();
 
@@ -781,7 +767,7 @@ export class WorkspaceRepository<
     );
 
     const relationMetadataMap = new Map(
-      Object.values(objectMetadata.fields)
+      objectMetadata.fields
         .filter(({ type }) => isRelationFieldMetadataType(type))
         .map((fieldMetadata) => [
           fieldMetadata.name,
@@ -792,7 +778,7 @@ export class WorkspaceRepository<
             relationType: computeRelationType(
               fieldMetadata,
               fieldMetadata.fromRelationMetadata ??
-                (fieldMetadata.toRelationMetadata as RelationMetadataEntity),
+                fieldMetadata.toRelationMetadata,
             ),
           },
         ]),
@@ -815,14 +801,16 @@ export class WorkspaceRepository<
 
       if (relationMetadata) {
         const toObjectMetadata =
-          this.internalContext.objectMetadataMap[
-            relationMetadata.toObjectMetadataId
-          ];
+          this.internalContext.objectMetadataCollection.find(
+            (objectMetadata) =>
+              objectMetadata.id === relationMetadata.toObjectMetadataId,
+          );
 
         const fromObjectMetadata =
-          this.internalContext.objectMetadataMap[
-            relationMetadata.fromObjectMetadataId
-          ];
+          this.internalContext.objectMetadataCollection.find(
+            (objectMetadata) =>
+              objectMetadata.id === relationMetadata.fromObjectMetadataId,
+          );
 
         if (!toObjectMetadata) {
           throw new Error(

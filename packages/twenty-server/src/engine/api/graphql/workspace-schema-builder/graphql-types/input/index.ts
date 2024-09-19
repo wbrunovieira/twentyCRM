@@ -1,4 +1,3 @@
-export * from './array-filter.input-type';
 export * from './big-float-filter.input-type';
 export * from './big-int-filter.input-type';
 export * from './boolean-filter.input-type';

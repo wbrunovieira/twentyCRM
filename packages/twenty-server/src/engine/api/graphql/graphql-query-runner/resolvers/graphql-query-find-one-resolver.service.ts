@@ -7,16 +7,16 @@ import {
 import { WorkspaceQueryRunnerOptions } from 'src/engine/api/graphql/workspace-query-runner/interfaces/query-runner-option.interface';
 import { FindOneResolverArgs } from 'src/engine/api/graphql/workspace-resolver-builder/interfaces/workspace-resolvers-builder.interface';
 
-import { QUERY_MAX_RECORDS } from 'src/engine/api/graphql/graphql-query-runner/constants/query-max-records.constant';
 import {
   GraphqlQueryRunnerException,
   GraphqlQueryRunnerExceptionCode,
 } from 'src/engine/api/graphql/graphql-query-runner/errors/graphql-query-runner.exception';
 import { GraphqlQueryParser } from 'src/engine/api/graphql/graphql-query-runner/graphql-query-parsers/graphql-query.parser';
-import { ProcessNestedRelationsHelper } from 'src/engine/api/graphql/graphql-query-runner/helpers/process-nested-relations.helper';
 import { ObjectRecordsToGraphqlConnectionMapper } from 'src/engine/api/graphql/graphql-query-runner/orm-mappers/object-records-to-graphql-connection.mapper';
-import { getObjectMetadataOrThrow } from 'src/engine/api/graphql/graphql-query-runner/utils/get-object-metadata-or-throw.util';
-import { generateObjectMetadataMap } from 'src/engine/metadata-modules/utils/generate-object-metadata-map.util';
+import {
+  convertObjectMetadataToMap,
+  getObjectMetadata,
+} from 'src/engine/api/graphql/graphql-query-runner/utils/convert-object-metadata-to-map.util';
 import { TwentyORMGlobalManager } from 'src/engine/twenty-orm/twenty-orm-global.manager';
 
 export class GraphqlQueryFindOneResolverService {
@@ -35,20 +35,15 @@ export class GraphqlQueryFindOneResolverService {
   ): Promise<ObjectRecord | undefined> {
     const { authContext, objectMetadataItem, info, objectMetadataCollection } =
       options;
-    const dataSource =
-      await this.twentyORMGlobalManager.getDataSourceForWorkspace(
+    const repository =
+      await this.twentyORMGlobalManager.getRepositoryForWorkspace(
         authContext.workspace.id,
+        objectMetadataItem.nameSingular,
       );
-
-    const repository = await dataSource.getRepository<ObjectRecord>(
-      objectMetadataItem.nameSingular,
-    );
-
-    const objectMetadataMap = generateObjectMetadataMap(
+    const objectMetadataMap = convertObjectMetadataToMap(
       objectMetadataCollection,
     );
-
-    const objectMetadata = getObjectMetadataOrThrow(
+    const objectMetadata = getObjectMetadata(
       objectMetadataMap,
       objectMetadataItem.nameSingular,
     );
@@ -57,22 +52,13 @@ export class GraphqlQueryFindOneResolverService {
       objectMetadataMap,
     );
 
-    const selectedFields = graphqlFields(info);
-
     const { select, relations } = graphqlQueryParser.parseSelectedFields(
       objectMetadataItem,
-      selectedFields,
+      graphqlFields(info),
     );
-    const { parsedFilters: where, withDeleted } =
-      graphqlQueryParser.parseFilter(args.filter ?? ({} as Filter));
+    const where = graphqlQueryParser.parseFilter(args.filter ?? ({} as Filter));
 
-    const objectRecord = (await repository.findOne({
-      where,
-      select,
-      withDeleted,
-    })) as ObjectRecord;
-
-    const limit = QUERY_MAX_RECORDS;
+    const objectRecord = await repository.findOne({ where, select, relations });
 
     if (!objectRecord) {
       throw new GraphqlQueryRunnerException(
@@ -81,29 +67,11 @@ export class GraphqlQueryFindOneResolverService {
       );
     }
 
-    const processNestedRelationsHelper = new ProcessNestedRelationsHelper(
-      this.twentyORMGlobalManager,
-    );
-
-    const objectRecords = [objectRecord];
-
-    if (relations) {
-      await processNestedRelationsHelper.processNestedRelations(
-        objectMetadataMap,
-        objectMetadata,
-        objectRecords,
-        relations,
-        limit,
-        authContext,
-        dataSource,
-      );
-    }
-
     const typeORMObjectRecordsParser =
       new ObjectRecordsToGraphqlConnectionMapper(objectMetadataMap);
 
     return typeORMObjectRecordsParser.processRecord(
-      objectRecords[0],
+      objectRecord,
       objectMetadataItem.nameSingular,
       1,
       1,

@@ -30,7 +30,7 @@ export const peopleAllView = async (
       {
         fieldMetadataId:
           objectMetadataMap[STANDARD_OBJECT_IDS.person].fields[
-            PERSON_STANDARD_FIELD_IDS.emails
+            PERSON_STANDARD_FIELD_IDS.email
           ],
         position: 1,
         isVisible: true,

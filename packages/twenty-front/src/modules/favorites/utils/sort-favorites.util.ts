@@ -19,8 +19,8 @@ export const sortFavorites = (
           const relationObject = favorite[relationField.name];
 
           const relationObjectNameSingular =
-            relationField.relationDefinition?.targetObjectMetadata
-              .nameSingular ?? '';
+            relationField.toRelationMetadata?.fromObjectMetadata.nameSingular ??
+            '';
 
           const objectRecordIdentifier =
             getObjectRecordIdentifierByNameSingular(
@@ -38,7 +38,6 @@ export const sortFavorites = (
             link: hasLinkToShowPage
               ? objectRecordIdentifier.linkToShowPage
               : '',
-            workspaceMemberId: favorite.workspaceMemberId,
           } as Favorite;
         }
       }

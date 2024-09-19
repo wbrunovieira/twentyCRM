@@ -14,6 +14,7 @@ type RecordIndexBoardContainerProps = {
   recordBoardId: string;
   viewBarId: string;
   objectNameSingular: string;
+  createRecord: () => Promise<void>;
 };
 
 export const RecordIndexBoardContainer = ({

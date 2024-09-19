@@ -46,7 +46,6 @@ export enum FieldMetadataType {
   RAW_JSON = 'RAW_JSON',
   RICH_TEXT = 'RICH_TEXT',
   ACTOR = 'ACTOR',
-  ARRAY = 'ARRAY',
 }
 
 @Entity('fieldMetadata')

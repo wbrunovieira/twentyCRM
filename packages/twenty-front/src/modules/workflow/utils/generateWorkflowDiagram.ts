@@ -7,7 +7,6 @@ import {
 } from '@/workflow/types/WorkflowDiagram';
 import { splitWorkflowTriggerEventName } from '@/workflow/utils/splitWorkflowTriggerEventName';
 import { MarkerType } from '@xyflow/react';
-import { isDefined } from 'twenty-ui';
 import { v4 } from 'uuid';
 import { capitalize } from '~/utils/string/capitalize';
 
@@ -15,7 +14,7 @@ export const generateWorkflowDiagram = ({
   trigger,
   steps,
 }: {
-  trigger: WorkflowTrigger | undefined;
+  trigger: WorkflowTrigger;
   steps: Array<WorkflowStep>;
 }): WorkflowDiagram => {
   const nodes: Array<WorkflowDiagramNode> = [];
@@ -56,34 +55,20 @@ export const generateWorkflowDiagram = ({
 
   // Start with the trigger node
   const triggerNodeId = TRIGGER_STEP_ID;
-
-  if (isDefined(trigger)) {
-    const triggerEvent = splitWorkflowTriggerEventName(
-      trigger.settings.eventName,
-    );
-
-    nodes.push({
-      id: triggerNodeId,
-      data: {
-        nodeType: 'trigger',
-        label: `${capitalize(triggerEvent.objectType)} is ${capitalize(triggerEvent.event)}`,
-      },
-      position: {
-        x: 0,
-        y: 0,
-      },
-    });
-  } else {
-    nodes.push({
-      id: triggerNodeId,
-      type: 'empty-trigger',
-      data: {} as any,
-      position: {
-        x: 0,
-        y: 0,
-      },
-    });
-  }
+  const triggerEvent = splitWorkflowTriggerEventName(
+    trigger.settings.eventName,
+  );
+  nodes.push({
+    id: triggerNodeId,
+    data: {
+      nodeType: 'trigger',
+      label: `${capitalize(triggerEvent.objectType)} is ${capitalize(triggerEvent.event)}`,
+    },
+    position: {
+      x: 0,
+      y: 0,
+    },
+  });
 
   let lastStepId = triggerNodeId;
 

@@ -4,7 +4,7 @@ import { ObjectMetadataItem } from '@/object-metadata/types/ObjectMetadataItem';
 import { mapObjectMetadataToGraphQLQuery } from '@/object-metadata/utils/mapObjectMetadataToGraphQLQuery';
 import {
   FieldMetadataType,
-  RelationDefinitionType,
+  RelationMetadataType,
 } from '~/generated-metadata/graphql';
 
 import { FieldMetadataItem } from '../types/FieldMetadataItem';
@@ -17,7 +17,10 @@ export const mapFieldMetadataToGraphQLQuery = ({
   computeReferences = false,
 }: {
   objectMetadataItems: ObjectMetadataItem[];
-  field: Pick<FieldMetadataItem, 'name' | 'type' | 'relationDefinition'>;
+  field: Pick<
+    FieldMetadataItem,
+    'name' | 'type' | 'toRelationMetadata' | 'fromRelationMetadata'
+  >;
   relationrecordFields?: Record<string, any>;
   computeReferences?: boolean;
 }): any => {
@@ -38,7 +41,6 @@ export const mapFieldMetadataToGraphQLQuery = ({
     FieldMetadataType.Position,
     FieldMetadataType.RawJson,
     FieldMetadataType.RichText,
-    FieldMetadataType.Array,
   ].includes(fieldType);
 
   if (fieldIsSimpleValue) {
@@ -47,12 +49,12 @@ export const mapFieldMetadataToGraphQLQuery = ({
 
   if (
     fieldType === FieldMetadataType.Relation &&
-    field.relationDefinition?.direction === RelationDefinitionType.ManyToOne
+    field.toRelationMetadata?.relationType === RelationMetadataType.OneToMany
   ) {
     const relationMetadataItem = objectMetadataItems.find(
       (objectMetadataItem) =>
         objectMetadataItem.id ===
-        field.relationDefinition?.targetObjectMetadata.id,
+        (field.toRelationMetadata as any)?.fromObjectMetadata?.id,
     );
 
     if (isUndefined(relationMetadataItem)) {
@@ -71,12 +73,12 @@ ${mapObjectMetadataToGraphQLQuery({
 
   if (
     fieldType === FieldMetadataType.Relation &&
-    field.relationDefinition?.direction === RelationDefinitionType.OneToMany
+    field.fromRelationMetadata?.relationType === RelationMetadataType.OneToMany
   ) {
     const relationMetadataItem = objectMetadataItems.find(
       (objectMetadataItem) =>
         objectMetadataItem.id ===
-        field.relationDefinition?.targetObjectMetadata.id,
+        (field.fromRelationMetadata as any)?.toObjectMetadata?.id,
     );
 
     if (isUndefined(relationMetadataItem)) {

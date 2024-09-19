@@ -1,7 +1,7 @@
-import dagre from '@dagrejs/dagre';
-import { useTheme } from '@emotion/react';
 import { useEffect } from 'react';
 import { Edge, Node } from 'reactflow';
+import dagre from '@dagrejs/dagre';
+import { useTheme } from '@emotion/react';
 import { useRecoilValue } from 'recoil';
 
 import { objectMetadataItemsState } from '@/object-metadata/states/objectMetadataItemsState';
@@ -43,10 +43,10 @@ export const SettingsDataModelOverviewEffect = ({
 
       for (const field of object.fields) {
         if (
-          isDefined(field.relationDefinition) &&
+          isDefined(field.toRelationMetadata) &&
           isDefined(
             items.find(
-              (x) => x.id === field.relationDefinition?.targetObjectMetadata.id,
+              (x) => x.id === field.toRelationMetadata?.fromObjectMetadata.id,
             ),
           )
         ) {
@@ -59,8 +59,8 @@ export const SettingsDataModelOverviewEffect = ({
             id: `${sourceObj}-${targetObj}`,
             source: object.namePlural,
             sourceHandle: `${field.id}-right`,
-            target: field.relationDefinition.targetObjectMetadata.namePlural,
-            targetHandle: `${field.relationDefinition.targetObjectMetadata}-left`,
+            target: field.toRelationMetadata.fromObjectMetadata.namePlural,
+            targetHandle: `${field.toRelationMetadata.fromFieldMetadataId}-left`,
             type: 'smoothstep',
             style: {
               strokeWidth: 1,
@@ -70,8 +70,8 @@ export const SettingsDataModelOverviewEffect = ({
             markerStart: 'marker',
             data: {
               sourceField: field.id,
-              targetField: field.relationDefinition.targetFieldMetadata.id,
-              relation: field.relationDefinition.direction,
+              targetField: field.toRelationMetadata.fromFieldMetadataId,
+              relation: field.toRelationMetadata.relationType,
               sourceObject: sourceObj,
               targetObject: targetObj,
             },

@@ -96,7 +96,7 @@ export const SettingsNavigationDrawerItems = () => {
           Icon={IconUserCircle}
         />
         <SettingsNavigationDrawerItem
-          label="Experience"
+          label="Appearance"
           path={SettingsPath.Appearance}
           Icon={IconColorSwatch}
         />

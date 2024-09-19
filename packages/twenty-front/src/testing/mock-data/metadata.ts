@@ -83,6 +83,22 @@ const customObjectMetadataItemEdge: ObjectEdge = {
                 name: 'myCustom',
               },
             },
+            toRelationMetadata: null,
+            fromRelationMetadata: {
+              __typename: 'relation',
+              id: 'c5cdbacd-2489-4409-be9e-bb4cb38f6ddd',
+              relationType: 'ONE_TO_MANY',
+              toFieldMetadataId: 'c9607ed7-168d-4743-a56a-689ffcfffe98',
+              toObjectMetadata: {
+                __typename: 'object',
+                id: 'dba899da-7d88-41ac-b70e-5ea612ab4b2e',
+                dataSourceId: 'd36e6a2d-28bc-459d-afd5-fe18e4405729',
+                nameSingular: 'viewField',
+                namePlural: 'viewFields',
+                isSystem: true,
+                isRemote: false,
+              },
+            },
           },
         },
         {
@@ -104,6 +120,8 @@ const customObjectMetadataItemEdge: ObjectEdge = {
             updatedAt: '2024-04-08T12:48:49.538Z',
             defaultValue: null,
             relationDefinition: null,
+            fromRelationMetadata: null,
+            toRelationMetadata: null,
           },
         },
         {
@@ -125,6 +143,8 @@ const customObjectMetadataItemEdge: ObjectEdge = {
             updatedAt: '2024-04-08T12:48:49.538Z',
             defaultValue: null,
             relationDefinition: null,
+            fromRelationMetadata: null,
+            toRelationMetadata: null,
           },
         },
         {
@@ -146,6 +166,8 @@ const customObjectMetadataItemEdge: ObjectEdge = {
             updatedAt: '2024-04-08T12:48:49.538Z',
             defaultValue: "''",
             relationDefinition: null,
+            fromRelationMetadata: null,
+            toRelationMetadata: null,
           },
         },
         {
@@ -167,6 +189,8 @@ const customObjectMetadataItemEdge: ObjectEdge = {
             updatedAt: '2024-04-08T12:48:49.538Z',
             defaultValue: 'now',
             relationDefinition: null,
+            fromRelationMetadata: null,
+            toRelationMetadata: null,
           },
         },
         {
@@ -188,6 +212,8 @@ const customObjectMetadataItemEdge: ObjectEdge = {
             updatedAt: '2024-04-08T12:48:49.538Z',
             defaultValue: 'now',
             relationDefinition: null,
+            fromRelationMetadata: null,
+            toRelationMetadata: null,
           },
         },
         {
@@ -209,6 +235,8 @@ const customObjectMetadataItemEdge: ObjectEdge = {
             updatedAt: '2024-04-08T12:48:49.538Z',
             defaultValue: 'uuid',
             relationDefinition: null,
+            fromRelationMetadata: null,
+            toRelationMetadata: null,
           },
         },
         {
@@ -249,6 +277,8 @@ const customObjectMetadataItemEdge: ObjectEdge = {
             updatedAt: '2024-04-08T12:48:49.538Z',
             defaultValue: null,
             relationDefinition: null,
+            fromRelationMetadata: null,
+            toRelationMetadata: null,
           },
         },
       ],

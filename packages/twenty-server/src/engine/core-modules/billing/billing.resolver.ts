@@ -16,8 +16,7 @@ import { User } from 'src/engine/core-modules/user/user.entity';
 import { Workspace } from 'src/engine/core-modules/workspace/workspace.entity';
 import { AuthUser } from 'src/engine/decorators/auth/auth-user.decorator';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
-import { UserAuthGuard } from 'src/engine/guards/user-auth.guard';
-import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
+import { JwtAuthGuard } from 'src/engine/guards/jwt.auth.guard';
 
 @Resolver()
 export class BillingResolver {
@@ -38,7 +37,7 @@ export class BillingResolver {
   }
 
   @Query(() => SessionEntity)
-  @UseGuards(WorkspaceAuthGuard, UserAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async billingPortalSession(
     @AuthUser() user: User,
     @Args() { returnUrlPath }: BillingSessionInput,
@@ -52,7 +51,7 @@ export class BillingResolver {
   }
 
   @Mutation(() => SessionEntity)
-  @UseGuards(WorkspaceAuthGuard, UserAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async checkoutSession(
     @AuthWorkspace() workspace: Workspace,
     @AuthUser() user: User,
@@ -80,7 +79,7 @@ export class BillingResolver {
   }
 
   @Mutation(() => UpdateBillingEntity)
-  @UseGuards(WorkspaceAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async updateBillingSubscription(@AuthUser() user: User) {
     await this.billingSubscriptionService.applyBillingSubscription(user);
 

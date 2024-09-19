@@ -154,7 +154,6 @@ export const useCombinedViewFilters = (viewBarComponentId?: string) => {
       unsavedToUpsertViewFiltersState,
     ],
   );
-
   return {
     upsertCombinedViewFilter,
     removeCombinedViewFilter,
